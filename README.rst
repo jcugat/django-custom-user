@@ -13,6 +13,7 @@ Quick start
 
     pip install django-custom-user
 
+
 2. Add ``'custom_user'`` to your ``INSTALLED_APPS`` setting:
 
 .. code-block:: python
@@ -22,17 +23,19 @@ Quick start
         'custom_user',
     )
 
+
 3. Set your ``AUTH_USER_MODEL`` setting to use ``EmailUser``:
 
 .. code-block:: python
 
-      AUTH_USER_MODEL = 'custom_user.EmailUser'
+    AUTH_USER_MODEL = 'custom_user.EmailUser'
+
 
 4. Create the database tables.
 
 .. code-block:: python
 
-      python manage.py syncdb
+    python manage.py syncdb
 
 
 Usage
