@@ -1,4 +1,9 @@
-*.log
-*.pot
-*.pyc
-local_settings.py
+# Python bytecode
+*.py[co]
+
+# Packaging files
+*.egg*
+
+# Editor temp files
+*.swp
+*~
