@@ -82,7 +82,7 @@ class UserManagerTest(TestCase):
         email_lowercase = 'normal@normal.com'
         user = get_user_model().objects.create_user(email_lowercase)
         self.assertEqual(user.email, email_lowercase)
-        self.assertEqual(user.password, '!')
+        self.assertFalse(user.has_usable_password())
         self.assertTrue(user.is_active)
         self.assertFalse(user.is_staff)
         self.assertFalse(user.is_superuser)
@@ -142,8 +142,7 @@ class EmailUserCreationFormTest(TestCase):
             }
         form = EmailUserCreationForm(data)
         self.assertFalse(form.is_valid())
-        self.assertEqual(form["email"].errors,
-                         [force_text(form.fields['email'].error_messages['invalid'])])
+        self.assertEqual(form['email'].errors, [_('Enter a valid email address.')])
 
     def test_password_verification(self):
         # The verification password is incorrect.
@@ -199,8 +198,7 @@ class EmailUserChangeFormTest(TestCase):
         data = {'email': 'not valid'}
         form = EmailUserChangeForm(data, instance=user)
         self.assertFalse(form.is_valid())
-        self.assertEqual(form['email'].errors,
-                         [force_text(form.fields['email'].error_messages['invalid'])])
+        self.assertEqual(form['email'].errors, [_('Enter a valid email address.')])
 
     def test_unsuable_password(self):
         user = EmailUser.objects.get(email='empty_password@example.com')
