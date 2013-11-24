@@ -92,4 +92,5 @@ class EmailUser(AbstractEmailUser):
 
     Use this if you don't need to extend EmailUser.
     """
-    pass
+    class Meta:
+        swappable = 'AUTH_USER_MODEL'
