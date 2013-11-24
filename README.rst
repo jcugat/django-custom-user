@@ -78,3 +78,17 @@ You can easily extend ``EmailUser`` by inheriting from ``AbstractEmailUser``. Fo
         """
         date_of_birth = models.DateField()
 
+
+Changelog
+---------
+
+Version 0.2 (2013-11-24)
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+- Django 1.6 compatible.
+
+Version 0.1 (2013-04-09)
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+- Initial release.
+
