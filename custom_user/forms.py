@@ -1,8 +1,7 @@
 from django import forms
 from django.contrib.auth.forms import ReadOnlyPasswordHashField
+from django.contrib.auth import get_user_model
 from django.utils.translation import ugettext_lazy as _
-
-from .models import EmailUser
 
 
 class EmailUserCreationForm(forms.ModelForm):
@@ -22,7 +21,7 @@ class EmailUserCreationForm(forms.ModelForm):
         help_text=_("Enter the same password as above, for verification."))
 
     class Meta:
-        model = EmailUser
+        model = get_user_model()
         fields = ('email',)
 
     def clean_email(self):
@@ -30,8 +29,8 @@ class EmailUserCreationForm(forms.ModelForm):
         # but it sets a nicer error message than the ORM. See #13147.
         email = self.cleaned_data["email"]
         try:
-            EmailUser._default_manager.get(email=email)
-        except EmailUser.DoesNotExist:
+            get_user_model()._default_manager.get(email=email)
+        except get_user_model().DoesNotExist:
             return email
         raise forms.ValidationError(self.error_messages['duplicate_email'])
 
@@ -65,7 +64,7 @@ class EmailUserChangeForm(forms.ModelForm):
                     "using <a href=\"password/\">this form</a>."))
 
     class Meta:
-        model = EmailUser
+        model = get_user_model()
 
     def __init__(self, *args, **kwargs):
         super(EmailUserChangeForm, self).__init__(*args, **kwargs)
