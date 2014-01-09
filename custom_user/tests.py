@@ -8,7 +8,6 @@ from django.utils.encoding import force_text
 from django.utils.translation import ugettext as _
 
 from .forms import EmailUserChangeForm, EmailUserCreationForm
-from .models import EmailUser
 
 
 class UserTest(TestCase):
@@ -121,7 +120,7 @@ class UserManagerTest(TestCase):
 class EmailUserCreationFormTest(TestCase):
 
     def setUp(self):
-        EmailUser.objects.create_user('testclient@example.com', 'test123')
+        get_user_model().objects.create_user('testclient@example.com', 'test123')
 
     def test_user_already_exists(self):
         data = {
@@ -181,27 +180,27 @@ class EmailUserCreationFormTest(TestCase):
         form = EmailUserCreationForm(data)
         self.assertTrue(form.is_valid())
         u = form.save()
-        self.assertEqual(repr(u), '<EmailUser: jsmith@example.com>')
+        self.assertEqual(repr(u), '<%s: jsmith@example.com>' % get_user_model().__name__)
 
 
 @override_settings(USE_TZ=False, PASSWORD_HASHERS=('django.contrib.auth.hashers.SHA1PasswordHasher',))
 class EmailUserChangeFormTest(TestCase):
 
     def setUp(self):
-        testclient = EmailUser.objects.create_user('testclient@example.com')
+        testclient = get_user_model().objects.create_user('testclient@example.com')
         testclient.password = 'sha1$6efc0$f93efe9fd7542f25a7be94871ea45aa95de57161'
         testclient.save()
-        EmailUser.objects.create_user('empty_password@example.com')
+        get_user_model().objects.create_user('empty_password@example.com')
 
     def test_username_validity(self):
-        user = EmailUser.objects.get(email='testclient@example.com')
+        user = get_user_model().objects.get(email='testclient@example.com')
         data = {'email': 'not valid'}
         form = EmailUserChangeForm(data, instance=user)
         self.assertFalse(form.is_valid())
         self.assertEqual(form['email'].errors, [_('Enter a valid email address.')])
 
     def test_unsuable_password(self):
-        user = EmailUser.objects.get(email='empty_password@example.com')
+        user = get_user_model().objects.get(email='empty_password@example.com')
         user.set_unusable_password()
         user.save()
         form = EmailUserChangeForm(instance=user)
@@ -210,7 +209,7 @@ class EmailUserChangeFormTest(TestCase):
     def test_bug_19133(self):
         "The change form does not return the password value"
         # Use the form to construct the POST data
-        user = EmailUser.objects.get(email='testclient@example.com')
+        user = get_user_model().objects.get(email='testclient@example.com')
         form_for_data = EmailUserChangeForm(instance=user)
         post_data = form_for_data.initial
 
@@ -225,7 +224,7 @@ class EmailUserChangeFormTest(TestCase):
         self.assertEqual(form.cleaned_data['password'], 'sha1$6efc0$f93efe9fd7542f25a7be94871ea45aa95de57161')
 
     def test_bug_19349_bound_password_field(self):
-        user = EmailUser.objects.get(email='testclient@example.com')
+        user = get_user_model().objects.get(email='testclient@example.com')
         form = EmailUserChangeForm(data={}, instance=user)
         # When rendering the bound password field,
         # ReadOnlyPasswordHashWidget needs the initial
