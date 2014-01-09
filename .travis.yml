@@ -20,7 +20,9 @@ install:
   - pip install -r requirements-test.txt
 
 # command to run tests using coverage, e.g. python setup.py test
-script: coverage run --source custom_user `which django-admin.py` test custom_user --settings=test_settings.settings
+script:
+  - coverage run --source custom_user `which django-admin.py` test custom_user --settings=test_settings.settings
+  - coverage run --append --source custom_user `which django-admin.py` test custom_user --settings=test_settings.settings_subclass
 
 # report coverage to coveralls.io
 after_success: coveralls
