@@ -1,23 +1,45 @@
+# -*- coding: utf-8 -*-
+#!/usr/bin/env python
+
 import os
-from setuptools import setup
+import sys
 
-README = open(os.path.join(os.path.dirname(__file__), 'README.rst')).read()
+import custom_user
 
-# allow setup.py to be run from any path
-os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
+try:
+    from setuptools import setup
+except ImportError:
+    from distutils.core import setup
+
+version = custom_user.__version__
+
+if sys.argv[-1] == 'publish':
+    os.system('python setup.py sdist upload')
+    print("You probably want to also tag the version now:")
+    print("  git tag -a %s -m 'version %s'" % (version, version))
+    print("  git push --tags")
+    sys.exit()
+
+readme = open('README.rst').read()
 
 setup(
     name='django-custom-user',
-    version='0.2',
-    packages=['custom_user'],
-    include_package_data=True,
-    license='BSD License',
-    description="Custom user model for Django >= 1.5 with the same behaviour as Django's default User but with email instead of username.",
-    long_description=README,
-    keywords='django custom user auth model email without username',
-    url='https://github.com/recreatic/django-custom-user',
+    version=version,
+    description="""Custom user model for Django >= 1.5 with the same behaviour as Django's default User but with email instead of username.""",
+    long_description=readme,
     author='Recreatic',
     author_email='info@recreatic.com',
+    url='https://github.com/recreatic/django-custom-user',
+    packages=[
+        'custom_user',
+    ],
+    include_package_data=True,
+    install_requires=[
+        "Django >= 1.5",
+    ],
+    license='BSD License',
+    zip_safe=False,
+    keywords='django custom user auth model email without username',
     classifiers=[
         'Environment :: Web Environment',
         'Framework :: Django',
@@ -25,12 +47,12 @@ setup(
         'License :: OSI Approved :: BSD License',
         'Operating System :: OS Independent',
         'Programming Language :: Python',
+        'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.6',
         'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.3',
         'Topic :: Internet :: WWW/HTTP',
         'Topic :: Internet :: WWW/HTTP :: Dynamic Content',
-    ],
-    install_requires=[
-        "Django >= 1.5",
     ],
 )
