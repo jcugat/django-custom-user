@@ -1,3 +1,4 @@
+from django.contrib import admin
 from django.contrib.auth import get_user_model
 from django.core import mail
 from django.forms.fields import Field
@@ -230,3 +231,10 @@ class EmailUserChangeFormTest(TestCase):
         # ReadOnlyPasswordHashWidget needs the initial
         # value to render correctly
         self.assertEqual(form.initial['password'], form['password'].value())
+
+
+class EmailUserAdminTest(TestCase):
+
+    def test_admin(self):
+        # Force Django to load ModelAdmin objects
+        admin.autodiscover()
