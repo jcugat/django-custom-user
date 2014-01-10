@@ -32,7 +32,10 @@ class EmailUserCreationForm(forms.ModelForm):
             get_user_model()._default_manager.get(email=email)
         except get_user_model().DoesNotExist:
             return email
-        raise forms.ValidationError(self.error_messages['duplicate_email'])
+        raise forms.ValidationError(
+            self.error_messages['duplicate_email'],
+            code='duplicate_email',
+        )
 
     def clean_password2(self):
         # Check that the two password entries match
@@ -40,7 +43,9 @@ class EmailUserCreationForm(forms.ModelForm):
         password2 = self.cleaned_data.get("password2")
         if password1 and password2 and password1 != password2:
             raise forms.ValidationError(
-                self.error_messages['password_mismatch'])
+                self.error_messages['password_mismatch'],
+                code='password_mismatch',
+            )
         return password2
 
     def save(self, commit=True):

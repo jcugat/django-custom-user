@@ -6,32 +6,30 @@ from django.utils.translation import ugettext_lazy as _
 
 
 class EmailUserManager(BaseUserManager):
-    def create_user(self, email, password=None, **extra_fields):
+
+    def _create_user(self, email, password,
+                     is_staff, is_superuser, **extra_fields):
         """
         Creates and saves an EmailUser with the given email and password.
         """
         now = timezone.now()
         if not email:
             raise ValueError('The given email must be set')
-        email = EmailUserManager.normalize_email(email)
-        user = self.model(email=email, is_staff=False, is_active=True,
-                          is_superuser=False, last_login=now,
+        email = self.normalize_email(email)
+        user = self.model(email=email, is_staff=is_staff, is_active=True,
+                          is_superuser=is_superuser, last_login=now,
                           date_joined=now, **extra_fields)
-
         user.set_password(password)
         user.save(using=self._db)
         return user
 
+    def create_user(self, email, password=None, **extra_fields):
+        return self._create_user(email, password, False, False,
+                                 **extra_fields)
+
     def create_superuser(self, email, password, **extra_fields):
-        """
-        Creates and saves a superuser with the given email and password.
-        """
-        user = self.create_user(email, password, **extra_fields)
-        user.is_staff = True
-        user.is_active = True
-        user.is_superuser = True
-        user.save(using=self._db)
-        return user
+        return self._create_user(email, password, True, True,
+                                 **extra_fields)
 
 
 class AbstractEmailUser(AbstractBaseUser, PermissionsMixin):
