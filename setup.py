@@ -41,6 +41,7 @@ setup(
     zip_safe=False,
     keywords='django custom user auth model email without username',
     classifiers=[
+        'Development Status :: 4 - Beta',
         'Environment :: Web Environment',
         'Framework :: Django',
         'Intended Audience :: Developers',
