@@ -63,6 +63,8 @@ class AbstractEmailUser(AbstractBaseUser, PermissionsMixin):
     REQUIRED_FIELDS = []
 
     class Meta:
+        verbose_name = _('user')
+        verbose_name_plural = _('users')
         abstract = True
 
     def get_full_name(self):
@@ -90,5 +92,5 @@ class EmailUser(AbstractEmailUser):
 
     Use this if you don't need to extend EmailUser.
     """
-    class Meta:
+    class Meta(AbstractEmailUser.Meta):
         swappable = 'AUTH_USER_MODEL'
