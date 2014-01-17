@@ -95,10 +95,16 @@ You can easily extend ``EmailUser`` by inheriting from ``AbstractEmailUser``. Fo
 Changelog
 ---------
 
+Version 0.3 (2014-01-17)
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+- AdminSite now works when subclassing AbstractEmailUser (thanks to Ivan Virabyan).
+- Updated model changes from Django 1.6.1.
+
 Version 0.2 (2013-11-24)
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-- Django 1.6 compatible.
+- Django 1.6 compatible (thanks to Simon Luijk).
 
 Version 0.1 (2013-04-09)
 ~~~~~~~~~~~~~~~~~~~~~~~~
