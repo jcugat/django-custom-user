@@ -16,11 +16,11 @@ class UserTest(TestCase):
     user_email = 'newuser@localhost.local'
     user_password = '1234'
 
-    def create_user(self):
+    def create_user(self, *args, **kwargs):
         """
         Creates and returns a new user with self.user_email as login and self.user_password as password.
         """
-        return get_user_model().objects.create_user(self.user_email, self.user_password)
+        return get_user_model().objects.create_user(self.user_email, self.user_password, *args, **kwargs)
 
     def test_user_creation(self):
         # Create a new user saving the time frame
@@ -43,6 +43,16 @@ class UserTest(TestCase):
         self.assertTrue(get_user_model().objects.all()[0].is_active)
         self.assertFalse(get_user_model().objects.all()[0].is_staff)
         self.assertFalse(get_user_model().objects.all()[0].is_superuser)
+
+    def test_user_creation_is_active(self):
+        # Create deactivated user
+        user = self.create_user(is_active=False)
+        self.assertFalse(user.is_active)
+
+    def test_user_creation_is_staff(self):
+        # Create staff user
+        user = self.create_user(is_staff=True)
+        self.assertTrue(user.is_staff)
 
     def test_user_get_full_name(self):
         user = self.create_user()
@@ -114,7 +124,7 @@ class UserManagerTest(TestCase):
     def test_empty_username(self):
         self.assertRaisesMessage(ValueError,
                                  'The given email must be set',
-                                  get_user_model().objects.create_user, email='')
+                                 get_user_model().objects.create_user, email='')
 
 
 @override_settings(USE_TZ=False, PASSWORD_HASHERS=('django.contrib.auth.hashers.SHA1PasswordHasher',))
