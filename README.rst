@@ -95,6 +95,11 @@ You can easily extend ``EmailUser`` by inheriting from ``AbstractEmailUser``. Fo
 Changelog
 ---------
 
+Version 0.4 (2014-03-06)
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+- The create_user() and create_superuser() manager methods now accept is_active and is_staff as parameters (thanks to Edil Kratskih).
+
 Version 0.3 (2014-01-17)
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
