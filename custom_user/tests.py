@@ -16,11 +16,11 @@ class UserTest(TestCase):
     user_email = 'newuser@localhost.local'
     user_password = '1234'
 
-    def create_user(self, *args, **kwargs):
+    def create_user(self):
         """
         Creates and returns a new user with self.user_email as login and self.user_password as password.
         """
-        return get_user_model().objects.create_user(self.user_email, self.user_password, *args, **kwargs)
+        return get_user_model().objects.create_user(self.user_email, self.user_password)
 
     def test_user_creation(self):
         # Create a new user saving the time frame
@@ -43,16 +43,6 @@ class UserTest(TestCase):
         self.assertTrue(get_user_model().objects.all()[0].is_active)
         self.assertFalse(get_user_model().objects.all()[0].is_staff)
         self.assertFalse(get_user_model().objects.all()[0].is_superuser)
-
-    def test_user_creation_is_active(self):
-        # Create deactivated user
-        user = self.create_user(is_active=False)
-        self.assertFalse(user.is_active)
-
-    def test_user_creation_is_staff(self):
-        # Create staff user
-        user = self.create_user(is_staff=True)
-        self.assertTrue(user.is_staff)
 
     def test_user_get_full_name(self):
         user = self.create_user()
@@ -106,6 +96,20 @@ class UserManagerTest(TestCase):
         self.assertTrue(user.is_active)
         self.assertTrue(user.is_staff)
         self.assertTrue(user.is_superuser)
+
+    def test_user_creation_is_active(self):
+        # Create deactivated user
+        email_lowercase = 'normal@normal.com'
+        password = 'password1234$%&/'
+        user = get_user_model().objects.create_user(email_lowercase, password, is_active=False)
+        self.assertFalse(user.is_active)
+
+    def test_user_creation_is_staff(self):
+        # Create staff user
+        email_lowercase = 'normal@normal.com'
+        password = 'password1234$%&/'
+        user = get_user_model().objects.create_user(email_lowercase, password, is_staff=True)
+        self.assertTrue(user.is_staff)
 
     def test_create_user_email_domain_normalize_rfc3696(self):
         # According to http://tools.ietf.org/html/rfc3696#section-3
