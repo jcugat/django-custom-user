@@ -70,6 +70,7 @@ class EmailUserChangeForm(forms.ModelForm):
 
     class Meta:
         model = get_user_model()
+        exclude = ()
 
     def __init__(self, *args, **kwargs):
         super(EmailUserChangeForm, self).__init__(*args, **kwargs)
