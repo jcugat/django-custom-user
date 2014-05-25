@@ -1,3 +1,4 @@
+""" Admin definition for EmailUser."""
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.utils.translation import ugettext_lazy as _
@@ -7,17 +8,21 @@ from .models import EmailUser
 
 
 class EmailUserAdmin(UserAdmin):
+
+    """EmailUser Admin model."""
+
     fieldsets = (
         (None, {'fields': ('email', 'password')}),
         (_('Permissions'), {'fields': ('is_active', 'is_staff', 'is_superuser',
                                        'groups', 'user_permissions')}),
         (_('Important dates'), {'fields': ('last_login', 'date_joined')}),
     )
-    add_fieldsets = (
-        (None, {
+    add_fieldsets = ((
+        None, {
             'classes': ('wide',),
-            'fields': ('email', 'password1', 'password2')}
-        ),
+            'fields': ('email', 'password1', 'password2')
+        }
+    ),
     )
 
     # The forms to add and change user instances
