@@ -1,3 +1,4 @@
+import django
 from django.contrib import admin
 from django.contrib.auth import get_user_model
 from django.core import mail
@@ -246,6 +247,25 @@ class EmailUserChangeFormTest(TestCase):
         # value to render correctly
         self.assertEqual(form.initial['password'], form['password'].value())
 
+    def test_missing_fields_exclude_attributes(self):
+        """
+        RemovedInDjango18Warning: Creating a ModelForm without either the 'fields' attribute 
+        or the 'exclude' attribute is deprecated - form EmailUserChangeForm needs updating
+        """
+
+        version, major, minor, r, n = django.VERSION
+        if version >= 1 and major >= 7:
+        
+            user = get_user_model().objects.get(email='testclient@example.com')
+            form = EmailUserChangeForm(data={}, instance=user)
+
+            fields_missing = getattr(form.Meta, 'fields', None)
+            exclude_missing = getattr(form.Meta, 'exclude', None)
+        
+            # print (fields_missing, exclude_missing)
+
+            if fields_missing is None and exclude_missing is ():
+                raise Exception('creating a ModelForm without fields and exclude attributes is deprecated')
 
 class EmailUserAdminTest(TestCase):
 
