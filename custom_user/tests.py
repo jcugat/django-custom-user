@@ -141,7 +141,7 @@ class EmailUserCreationFormTest(TestCase):
             'email': 'testclient@example.com',
             'password1': 'test123',
             'password2': 'test123',
-            }
+        }
         form = EmailUserCreationForm(data)
         self.assertFalse(form.is_valid())
         self.assertEqual(form["email"].errors,
@@ -152,7 +152,7 @@ class EmailUserCreationFormTest(TestCase):
             'email': 'testclient',
             'password1': 'test123',
             'password2': 'test123',
-            }
+        }
         form = EmailUserCreationForm(data)
         self.assertFalse(form.is_valid())
         self.assertEqual(form['email'].errors, [_('Enter a valid email address.')])
@@ -163,7 +163,7 @@ class EmailUserCreationFormTest(TestCase):
             'email': 'testclient@example.com',
             'password1': 'test123',
             'password2': 'test',
-            }
+        }
         form = EmailUserCreationForm(data)
         self.assertFalse(form.is_valid())
         self.assertEqual(form["password2"].errors,
@@ -190,7 +190,7 @@ class EmailUserCreationFormTest(TestCase):
             'email': 'jsmith@example.com',
             'password1': 'test123',
             'password2': 'test123',
-            }
+        }
         form = EmailUserCreationForm(data)
         self.assertTrue(form.is_valid())
         u = form.save()
