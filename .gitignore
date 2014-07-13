@@ -11,3 +11,6 @@
 # Editor temp files
 *.swp
 *~
+
+# Sublime Text
+*.sublime-workspace
