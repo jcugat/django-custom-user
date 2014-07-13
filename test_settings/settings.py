@@ -10,5 +10,9 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'custom_user',
 ]
+MIDDLEWARE_CLASSES = (
+    'django.middleware.common.CommonMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
+)
 SECRET_KEY = 'not_random'
 AUTH_USER_MODEL = 'custom_user.EmailUser'
