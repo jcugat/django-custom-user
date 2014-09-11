@@ -4,11 +4,11 @@ Django Custom User
 .. image:: https://img.shields.io/pypi/v/django-custom-user.svg
     :target: https://pypi.python.org/pypi/django-custom-user
 
-.. image:: https://img.shields.io/travis/recreatic/django-custom-user/master.svg
-    :target: https://travis-ci.org/recreatic/django-custom-user
+.. image:: https://img.shields.io/travis/jcugat/django-custom-user/master.svg
+    :target: https://travis-ci.org/jcugat/django-custom-user
 
-.. image:: https://img.shields.io/coveralls/recreatic/django-custom-user/master.svg
-    :target: https://coveralls.io/r/recreatic/django-custom-user?branch=master
+.. image:: https://img.shields.io/coveralls/jcugat/django-custom-user/master.svg
+    :target: https://coveralls.io/r/jcugat/django-custom-user?branch=master
 
 .. image:: https://img.shields.io/pypi/dm/django-custom-user.svg
     :target: https://pypi.python.org/pypi/django-custom-user

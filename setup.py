@@ -27,9 +27,9 @@ setup(
     version=version,
     description="""Custom user model for Django >= 1.5 with the same behaviour as Django's default User but with email instead of username.""",
     long_description=readme,
-    author='Recreatic',
-    author_email='info@recreatic.com',
-    url='https://github.com/recreatic/django-custom-user',
+    author='Josep Cugat',
+    author_email='jcugat@gmail.com',
+    url='https://github.com/jcugat/django-custom-user',
     packages=[
         'custom_user',
     ],
