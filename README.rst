@@ -97,6 +97,24 @@ Remember to change the ``AUTH_USER_MODEL`` setting to your new class:
 
     AUTH_USER_MODEL = 'my_app.MyCustomEmailUser'
 
+If you use the AdminSite, add the following code to your ``my_app/admin.py`` file:
+
+.. code-block:: python
+
+    from django.contrib import admin
+    from custom_user.admin import EmailUserAdmin
+    from .models import MyCustomEmailUser
+
+
+    class MyCustomEmailUserAdmin(EmailUserAdmin):
+        """
+        You can customize the interface of your model here.
+        """
+        pass
+
+    # Register your models here.
+    admin.site.register(MyCustomEmailUser, MyCustomEmailUserAdmin)
+
 
 Changelog
 ---------
