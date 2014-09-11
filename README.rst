@@ -91,6 +91,12 @@ You can easily extend ``EmailUser`` by inheriting from ``AbstractEmailUser``. Fo
         """
         date_of_birth = models.DateField()
 
+Remember to change the ``AUTH_USER_MODEL`` setting to your new class:
+
+.. code-block:: python
+
+    AUTH_USER_MODEL = 'my_app.MyCustomEmailUser'
+
 
 Changelog
 ---------
