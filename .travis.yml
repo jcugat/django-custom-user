@@ -20,6 +20,8 @@ matrix:
       env: DJANGO_VERSION="Django>=1.5,<1.6"
     - python: "2.6"
       env: DJANGO_VERSION="Django>=1.6,<1.7"
+    - python: "3.4"
+      env: DJANGO_VERSION="pylama"
 
 # command to install dependencies, e.g. pip install -r requirements.txt --use-mirrors
 install:
@@ -28,8 +30,9 @@ install:
 
 # command to run tests using coverage, e.g. python setup.py test
 script:
-  - coverage run --source custom_user `which django-admin.py` test custom_user --settings=test_settings.settings
-  - coverage run --append --source custom_user `which django-admin.py` test custom_user --settings=test_settings.settings_subclass
+  - if [[ $DJANGO_VERSION != 'pylama' ]]; then coverage run --source custom_user `which django-admin.py` test custom_user --settings=test_settings.settings; fi
+  - if [[ $DJANGO_VERSION != 'pylama' ]]; then coverage run --append --source custom_user `which django-admin.py` test custom_user --settings=test_settings.settings_subclass; fi
+  - if [[ $DJANGO_VERSION == 'pylama' ]]; then pylama; fi
 
 # report coverage to coveralls.io
 after_success: coveralls
