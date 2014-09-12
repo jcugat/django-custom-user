@@ -8,6 +8,7 @@ DATABASES = {
 INSTALLED_APPS = [
     'django.contrib.auth',
     'django.contrib.contenttypes',
+    'django.contrib.sessions',
     'custom_user',
     'test_custom_user_subclass',
 ]

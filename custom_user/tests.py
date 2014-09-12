@@ -3,6 +3,7 @@ from django.contrib import admin
 from django.contrib.auth import get_user_model
 from django.core import mail
 from django.forms.fields import Field
+from django.http import HttpRequest
 from django.test import TestCase
 from django.test.utils import override_settings
 from django.utils import timezone
@@ -10,6 +11,18 @@ from django.utils.encoding import force_text
 from django.utils.translation import ugettext as _
 
 from .forms import EmailUserChangeForm, EmailUserCreationForm
+
+try:
+    from django.contrib.auth.middleware import SessionAuthenticationMiddleware
+except ImportError:
+    # Only available from Django 1.7, ignore the tests otherwise
+    SessionAuthenticationMiddleware = None
+
+try:
+    from unittest import skipIf
+except ImportError:
+    # Only available from Python 2.7, import Django's bundled version otherwise
+    from django.utils.unittest import skipIf
 
 
 class UserTest(TestCase):
@@ -149,6 +162,38 @@ class UserManagerTest(TestCase):
         self.assertRaisesMessage(ValueError,
                                  'The given email must be set',
                                  get_user_model().objects.create_user, email='')
+
+
+@skipIf(SessionAuthenticationMiddleware is None, "SessionAuthenticationMiddleware not available in this version")
+class TestSessionAuthenticationMiddleware(TestCase):
+
+    def setUp(self):
+        self.user_email = 'test@example.com'
+        self.user_password = 'test_password'
+        self.user = get_user_model().objects.create_user(
+            self.user_email,
+            self.user_password)
+
+    def test_changed_password_invalidates_session(self):
+        """ Test that changing a user's password invalidates the session."""
+        verification_middleware = SessionAuthenticationMiddleware()
+        self.assertTrue(self.client.login(
+            username=self.user_email,
+            password=self.user_password,
+        ))
+        request = HttpRequest()
+        request.session = self.client.session
+        request.user = self.user
+        verification_middleware.process_request(request)
+        self.assertIsNotNone(request.user)
+        self.assertFalse(request.user.is_anonymous())
+
+        # After password change, user should be anonymous
+        request.user.set_password('new_password')
+        request.user.save()
+        verification_middleware.process_request(request)
+        self.assertIsNotNone(request.user)
+        self.assertTrue(request.user.is_anonymous())
 
 
 @override_settings(USE_TZ=False, PASSWORD_HASHERS=('django.contrib.auth.hashers.SHA1PasswordHasher',))
