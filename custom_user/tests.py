@@ -159,9 +159,11 @@ class UserManagerTest(TestCase):
         self.assertEqual(returned, 'email\ with_whitespace@d.com')
 
     def test_empty_username(self):
-        self.assertRaisesMessage(ValueError,
-                                 'The given email must be set',
-                                 get_user_model().objects.create_user, email='')
+        self.assertRaisesMessage(
+            ValueError,
+            'The given email must be set',
+            get_user_model().objects.create_user, email=''
+        )
 
 
 @skipIf(SessionAuthenticationMiddleware is None, "SessionAuthenticationMiddleware not available in this version")
@@ -221,7 +223,8 @@ class EmailUserCreationFormTest(TestCase):
         }
         form = EmailUserCreationForm(data)
         self.assertFalse(form.is_valid())
-        self.assertEqual(form['email'].errors, [_('Enter a valid email address.')])
+        self.assertEqual(form["email"].errors,
+                         [_('Enter a valid email address.')])
 
     def test_password_verification(self):
         # The verification password is incorrect.
@@ -267,17 +270,39 @@ class EmailUserCreationFormTest(TestCase):
 class EmailUserChangeFormTest(TestCase):
 
     def setUp(self):
-        testclient = get_user_model().objects.create_user('testclient@example.com')
-        testclient.password = 'sha1$6efc0$f93efe9fd7542f25a7be94871ea45aa95de57161'
-        testclient.save()
+        user = get_user_model().objects.create_user('testclient@example.com')
+        user.password = 'sha1$6efc0$f93efe9fd7542f25a7be94871ea45aa95de57161'
+        user.save()
         get_user_model().objects.create_user('empty_password@example.com')
+        user_unmanageable = get_user_model().objects.create_user('unmanageable_password@example.com')
+        user_unmanageable.password = '$'
+        user_unmanageable.save()
+        user_unknown = get_user_model().objects.create_user('unknown_password@example.com')
+        user_unknown.password = 'foo$bar'
+        user_unknown.save()
 
     def test_username_validity(self):
         user = get_user_model().objects.get(email='testclient@example.com')
         data = {'email': 'not valid'}
         form = EmailUserChangeForm(data, instance=user)
         self.assertFalse(form.is_valid())
-        self.assertEqual(form['email'].errors, [_('Enter a valid email address.')])
+        self.assertEqual(form['email'].errors,
+                         [_('Enter a valid email address.')])
+
+    def test_bug_14242(self):
+        # A regression test, introduce by adding an optimization for the
+        # EmailUserChangeForm.
+
+        class MyUserForm(EmailUserChangeForm):
+            def __init__(self, *args, **kwargs):
+                super(MyUserForm, self).__init__(*args, **kwargs)
+                self.fields['groups'].help_text = 'These groups give users different permissions'
+
+            class Meta(EmailUserChangeForm.Meta):
+                fields = ('groups',)
+
+        # Just check we can create it
+        MyUserForm({})
 
     def test_unsuable_password(self):
         user = get_user_model().objects.get(email='empty_password@example.com')
@@ -285,6 +310,25 @@ class EmailUserChangeFormTest(TestCase):
         user.save()
         form = EmailUserChangeForm(instance=user)
         self.assertIn(_("No password set."), form.as_table())
+
+    def test_bug_17944_empty_password(self):
+        user = get_user_model().objects.get(email='empty_password@example.com')
+        form = EmailUserChangeForm(instance=user)
+        self.assertIn(_("No password set."), form.as_table())
+
+    def test_bug_17944_unmanageable_password(self):
+        user = get_user_model().objects.get(email='unmanageable_password@example.com')
+        form = EmailUserChangeForm(instance=user)
+        self.assertIn(
+            _("Invalid password format or unknown hashing algorithm."),
+            form.as_table())
+
+    def test_bug_17944_unknown_password_algorithm(self):
+        user = get_user_model().objects.get(email='unknown_password@example.com')
+        form = EmailUserChangeForm(instance=user)
+        self.assertIn(
+            _("Invalid password format or unknown hashing algorithm."),
+            form.as_table())
 
     def test_bug_19133(self):
         """ The change form does not return the password value."""
