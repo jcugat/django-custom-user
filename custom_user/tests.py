@@ -1,7 +1,9 @@
 """ EmailUser tests."""
-from django.contrib import admin
+import django
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core import mail
+from django.core.urlresolvers import reverse
 from django.forms.fields import Field
 from django.http import HttpRequest
 from django.test import TestCase
@@ -358,6 +360,63 @@ class EmailUserChangeFormTest(TestCase):
 
 class EmailUserAdminTest(TestCase):
 
-    def test_admin(self):
-        # Force Django to load ModelAdmin objects
-        admin.autodiscover()
+    def setUp(self):
+        self.user_email = 'test@example.com'
+        self.user_password = 'test_password'
+        self.user = get_user_model().objects.create_superuser(
+            self.user_email,
+            self.user_password)
+
+        if settings.AUTH_USER_MODEL == "custom_user.EmailUser":
+            self.app_name = "custom_user"
+            self.model_name = "emailuser"
+            self.model_verbose_name = "user"
+            self.model_verbose_name_plural = "Users"
+            if django.VERSION[:2] < (1, 7):
+                self.app_verbose_name = "Custom_User"
+            else:
+                self.app_verbose_name = "Custom User"
+        elif settings.AUTH_USER_MODEL == "test_custom_user_subclass.MyCustomEmailUser":
+            self.app_name = "test_custom_user_subclass"
+            self.model_name = "mycustomemailuser"
+            self.model_verbose_name = "MyCustomEmailUserVerboseName"
+            self.model_verbose_name_plural = "MyCustomEmailUserVerboseNamePlural"
+            if django.VERSION[:2] < (1, 7):
+                self.app_verbose_name = "Test_Custom_User_Subclass"
+            else:
+                self.app_verbose_name = "Test Custom User Subclass"
+
+    def test_url(self):
+        self.assertTrue(self.client.login(
+            username=self.user_email,
+            password=self.user_password,
+        ))
+        response = self.client.get(reverse("admin:app_list", args=(self.app_name,)))
+        self.assertEqual(response.status_code, 200)
+
+    def test_app_name(self):
+        self.assertTrue(self.client.login(
+            username=self.user_email,
+            password=self.user_password,
+        ))
+
+        response = self.client.get(reverse("admin:app_list", args=(self.app_name,)))
+        self.assertEqual(response.context['app_list'][0]['name'], self.app_verbose_name)
+
+    def test_model_name(self):
+        self.assertTrue(self.client.login(
+            username=self.user_email,
+            password=self.user_password,
+        ))
+
+        response = self.client.get(reverse("admin:%s_%s_changelist" % (self.app_name, self.model_name)))
+        self.assertEqual(force_text(response.context['title']), "Select %s to change" % self.model_verbose_name)
+
+    def test_model_name_plural(self):
+        self.assertTrue(self.client.login(
+            username=self.user_email,
+            password=self.user_password,
+        ))
+
+        response = self.client.get(reverse("admin:app_list", args=(self.app_name,)))
+        self.assertEqual(force_text(response.context['app_list'][0]['models'][0]['name']), self.model_verbose_name_plural)

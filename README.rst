@@ -123,6 +123,7 @@ In development
 ~~~~~~~~~~~~~~
 
 - Django 1.7 compatible (thanks to j0hnsmith).
+- Custom application verbose_name in AdminSite with AppConfig.
 
 Version 0.4 (2014-03-06)
 ~~~~~~~~~~~~~~~~~~~~~~~~

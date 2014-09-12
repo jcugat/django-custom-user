@@ -1,0 +1,1 @@
+default_app_config = 'test_custom_user_subclass.apps.CustomUserSubclassConfig'
