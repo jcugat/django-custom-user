@@ -105,9 +105,9 @@ class AbstractEmailUser(AbstractBaseUser, PermissionsMixin):
         """ Return the email."""
         return self.email
 
-    def email_user(self, subject, message, from_email=None):
+    def email_user(self, subject, message, from_email=None, **kwargs):
         """ Send an email to this User."""
-        send_mail(subject, message, from_email, [self.email])
+        send_mail(subject, message, from_email, [self.email], **kwargs)
 
 
 class EmailUser(AbstractEmailUser):
