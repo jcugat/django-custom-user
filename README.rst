@@ -119,8 +119,8 @@ If you use the AdminSite, add the following code to your ``my_app/admin.py`` fil
 Changelog
 ---------
 
-In development
-~~~~~~~~~~~~~~
+Version 0.5 (2014-09-20)
+~~~~~~~~~~~~~~~~~~~~~~~~
 
 - Django 1.7 compatible (thanks to j0hnsmith).
 - Custom application verbose_name in AdminSite with AppConfig.
