@@ -1,5 +1,5 @@
-py==1.4.24
+py==1.4.25
 pylama==6.0.1
-tox==1.7.2
+tox==1.8.0
 virtualenv==1.11.6
 wheel==0.24.0
