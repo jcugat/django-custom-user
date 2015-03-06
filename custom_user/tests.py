@@ -2,6 +2,7 @@
 import django
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.contrib.auth.middleware import AuthenticationMiddleware
 from django.core import mail
 from django.core.urlresolvers import reverse
 from django.forms.fields import Field
@@ -178,26 +179,45 @@ class TestSessionAuthenticationMiddleware(TestCase):
             self.user_email,
             self.user_password)
 
-    def test_changed_password_invalidates_session(self):
-        """ Test that changing a user's password invalidates the session."""
-        verification_middleware = SessionAuthenticationMiddleware()
+        self.middleware_auth = AuthenticationMiddleware()
+        self.middleware_session_auth = SessionAuthenticationMiddleware()
         self.assertTrue(self.client.login(
             username=self.user_email,
             password=self.user_password,
         ))
-        request = HttpRequest()
-        request.session = self.client.session
-        request.user = self.user
-        verification_middleware.process_request(request)
-        self.assertIsNotNone(request.user)
-        self.assertFalse(request.user.is_anonymous())
+        self.request = HttpRequest()
+        self.request.session = self.client.session
 
-        # After password change, user should be anonymous
-        request.user.set_password('new_password')
-        request.user.save()
-        verification_middleware.process_request(request)
-        self.assertIsNotNone(request.user)
-        self.assertTrue(request.user.is_anonymous())
+    def test_changed_password_doesnt_invalidate_session(self):
+        # Changing a user's password shouldn't invalidate the session if session
+        # verification isn't activated.
+        session_key = self.request.session.session_key
+        self.middleware_auth.process_request(self.request)
+        self.middleware_session_auth.process_request(self.request)
+        self.assertIsNotNone(self.request.user)
+        self.assertFalse(self.request.user.is_anonymous())
+
+        # After password change, user should remain logged in.
+        self.user.set_password('new_password')
+        self.user.save()
+        self.middleware_auth.process_request(self.request)
+        self.middleware_session_auth.process_request(self.request)
+        self.assertIsNotNone(self.request.user)
+        self.assertFalse(self.request.user.is_anonymous())
+        self.assertEqual(session_key, self.request.session.session_key)
+
+    def test_changed_password_invalidates_session_with_middleware(self):
+        session_key = self.request.session.session_key
+        with self.modify_settings(MIDDLEWARE_CLASSES={'append': ['django.contrib.auth.middleware.SessionAuthenticationMiddleware']}):
+            # After password change, user should be anonymous
+            self.user.set_password('new_password')
+            self.user.save()
+            self.middleware_auth.process_request(self.request)
+            self.middleware_session_auth.process_request(self.request)
+            self.assertIsNotNone(self.request.user)
+            self.assertTrue(self.request.user.is_anonymous())
+        # session should be flushed
+        self.assertNotEqual(session_key, self.request.session.session_key)
 
 
 @override_settings(USE_TZ=False, PASSWORD_HASHERS=('django.contrib.auth.hashers.SHA1PasswordHasher',))
