@@ -62,7 +62,7 @@ Instead of referring to ``EmailUser`` directly, you should reference the user mo
 
     from django.contrib.auth import get_user_model
 
-    user = get_user_model().get(email="user@example.com")
+    user = get_user_model().objects.get(email="user@example.com")
 
 
 When you define a foreign key or many-to-many relations to the ``EmailUser`` model, you should specify the custom model using the ``AUTH_USER_MODEL`` setting. For example:
