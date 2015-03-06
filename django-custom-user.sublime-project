@@ -1,10 +1,18 @@
 {
-    "folders":
-    [
-        {
-            "follow_symlinks": true,
-            "path": ".",
-            "folder_exclude_patterns": [".tox"]
-        }
-    ]
+	"folders":
+	[
+		{
+			"folder_exclude_patterns":
+			[
+				".tox"
+			],
+			"follow_symlinks": true,
+			"path": "."
+		}
+	],
+	"settings":
+	{
+		"auto_python_builder_enabled": false,
+		"python_interpreter": "/usr/local/opt/pyenv/versions/django-custom-user/bin/python"
+	}
 }
