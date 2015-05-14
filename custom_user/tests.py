@@ -1,4 +1,4 @@
-""" EmailUser tests."""
+"""EmailUser tests."""
 import django
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -34,7 +34,7 @@ class UserTest(TestCase):
     user_password = '1234'
 
     def create_user(self):
-        """ Create and return a new user with self.user_email as login and self.user_password as password."""
+        """Create and return a new user with self.user_email as login and self.user_password as password."""
         return get_user_model().objects.create_user(self.user_email, self.user_password)
 
     def test_user_creation(self):
@@ -353,7 +353,7 @@ class EmailUserChangeFormTest(TestCase):
             form.as_table())
 
     def test_bug_19133(self):
-        """ The change form does not return the password value."""
+        """The change form does not return the password value."""
         # Use the form to construct the POST data
         user = get_user_model().objects.get(email='testclient@example.com')
         form_for_data = EmailUserChangeForm(instance=user)
