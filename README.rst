@@ -22,7 +22,7 @@ Quick start
 
 1. Install django-custom-user with your favorite Python package manager:
 
-.. code-block:: python
+.. code-block:: sh
 
     pip install django-custom-user
 
@@ -64,14 +64,14 @@ Quick start
 
    3. Create the migration:
 
-      .. code:: python
+      .. code:: sh
 
           python manage.py makemigrations custom_user
 
 
 5. Create the database tables.
 
-.. code-block:: python
+.. code-block:: sh
 
     python manage.py syncdb
 
