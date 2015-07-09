@@ -1,39 +1,110 @@
 # Config file for automatic testing at travis-ci.org
 
+# Use container-based infrastructure
+# http://docs.travis-ci.com/user/migrating-from-legacy/
+sudo: false
+
 language: python
 
-python:
-  - "3.4"
-  - "2.7"
+addons:
+  postgresql: "9.4"
 
 env:
   global:
     - PYTHONPATH=$TRAVIS_BUILD_DIR
-  matrix:
-    - DJANGO_VERSION="Django>=1.8,<1.9"
-    - DJANGO_VERSION="Django>=1.7,<1.8"
-    - DJANGO_VERSION="Django>=1.6,<1.7"
-    - DJANGO_VERSION="Django>=1.5,<1.6"
 
 matrix:
   include:
     - python: "2.6"
-      env: DJANGO_VERSION="Django>=1.5,<1.6"
+      env: TOX_ENV="py26-django15-mysql"
     - python: "2.6"
-      env: DJANGO_VERSION="Django>=1.6,<1.7"
+      env: TOX_ENV="py26-django15-postgres"
+    - python: "2.6"
+      env: TOX_ENV="py26-django15-sqlite"
+    - python: "2.6"
+      env: TOX_ENV="py26-django16-mysql"
+    - python: "2.6"
+      env: TOX_ENV="py26-django16-postgres"
+    - python: "2.6"
+      env: TOX_ENV="py26-django16-sqlite"
+    - python: "2.7"
+      env: TOX_ENV="py27-django15-mysql"
+    - python: "2.7"
+      env: TOX_ENV="py27-django15-postgres"
+    - python: "2.7"
+      env: TOX_ENV="py27-django15-sqlite"
+    - python: "2.7"
+      env: TOX_ENV="py27-django16-mysql"
+    - python: "2.7"
+      env: TOX_ENV="py27-django16-postgres"
+    - python: "2.7"
+      env: TOX_ENV="py27-django16-sqlite"
+    - python: "2.7"
+      env: TOX_ENV="py27-django17-mysql"
+    - python: "2.7"
+      env: TOX_ENV="py27-django17-postgres"
+    - python: "2.7"
+      env: TOX_ENV="py27-django17-sqlite"
+    - python: "2.7"
+      env: TOX_ENV="py27-django18-mysql"
+    - python: "2.7"
+      env: TOX_ENV="py27-django18-postgres"
+    - python: "2.7"
+      env: TOX_ENV="py27-django18-sqlite"
+    - python: "2.7"
+      env: TOX_ENV="py27-djangomaster-mysql"
+    - python: "2.7"
+      env: TOX_ENV="py27-djangomaster-postgres"
+    - python: "2.7"
+      env: TOX_ENV="py27-djangomaster-sqlite"
     - python: "3.4"
-      env: DJANGO_VERSION="pylama"
+      env: TOX_ENV="py34-django15-mysql"
+    - python: "3.4"
+      env: TOX_ENV="py34-django15-postgres"
+    - python: "3.4"
+      env: TOX_ENV="py34-django15-sqlite"
+    - python: "3.4"
+      env: TOX_ENV="py34-django16-mysql"
+    - python: "3.4"
+      env: TOX_ENV="py34-django16-postgres"
+    - python: "3.4"
+      env: TOX_ENV="py34-django16-sqlite"
+    - python: "3.4"
+      env: TOX_ENV="py34-django17-mysql"
+    - python: "3.4"
+      env: TOX_ENV="py34-django17-postgres"
+    - python: "3.4"
+      env: TOX_ENV="py34-django17-sqlite"
+    - python: "3.4"
+      env: TOX_ENV="py34-django18-mysql"
+    - python: "3.4"
+      env: TOX_ENV="py34-django18-postgres"
+    - python: "3.4"
+      env: TOX_ENV="py34-django18-sqlite"
+    - python: "3.4"
+      env: TOX_ENV="py34-djangomaster-mysql"
+    - python: "3.4"
+      env: TOX_ENV="py34-djangomaster-postgres"
+    - python: "3.4"
+      env: TOX_ENV="py34-djangomaster-sqlite"
+    - python: "3.4"
+      env: TOX_ENV="pylama"
+
+  # Put all *-djangomaster-* here
+  allow_failures:
+    - env: TOX_ENV="py27-djangomaster-mysql"
+    - env: TOX_ENV="py27-djangomaster-postgres"
+    - env: TOX_ENV="py27-djangomaster-sqlite"
+    - env: TOX_ENV="py34-djangomaster-mysql"
+    - env: TOX_ENV="py34-djangomaster-postgres"
+    - env: TOX_ENV="py34-djangomaster-sqlite"
 
 # command to install dependencies, e.g. pip install -r requirements.txt --use-mirrors
 install:
-  - pip install $DJANGO_VERSION
-  - pip install -r requirements-test.txt
+  - pip install -r requirements.txt
 
 # command to run tests using coverage, e.g. python setup.py test
-script:
-  - if [[ $DJANGO_VERSION != 'pylama' ]]; then coverage run --source custom_user `which django-admin.py` test custom_user --noinput --settings=test_settings.settings; fi
-  - if [[ $DJANGO_VERSION != 'pylama' ]]; then coverage run --append --source custom_user `which django-admin.py` test custom_user --noinput --settings=test_settings.settings_subclass; fi
-  - if [[ $DJANGO_VERSION == 'pylama' ]]; then pylama; fi
+script: tox -e $TOX_ENV
 
 # report coverage to coveralls.io
 after_success: coveralls

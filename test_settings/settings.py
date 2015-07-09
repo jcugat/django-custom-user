@@ -1,9 +1,11 @@
+import environ
+
+env = environ.Env()
+
 DEBUG = True
 USE_TZ = True
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-    }
+    'default': env.db(),
 }
 INSTALLED_APPS = [
     'django.contrib.admin',

@@ -1,4 +1,6 @@
 """EmailUser tests."""
+from mock import patch
+
 import django
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -39,20 +41,17 @@ class UserTest(TestCase):
 
     def test_user_creation(self):
         # Create a new user saving the time frame
-        before_creation = timezone.now()
-        self.create_user()
-        after_creation = timezone.now()
+        right_now = timezone.now().replace(microsecond=0)  # MySQL doesn't store microseconds
+        with patch.object(timezone, 'now', return_value=right_now):
+            self.create_user()
 
         # Check user exists and email is correct
         self.assertEqual(get_user_model().objects.all().count(), 1)
         self.assertEqual(get_user_model().objects.all()[0].email, self.user_email)
 
-        # Check date_joined, date_modified and last_login dates
-        self.assertLess(before_creation, get_user_model().objects.all()[0].date_joined)
-        self.assertLess(get_user_model().objects.all()[0].date_joined, after_creation)
-
-        self.assertLess(before_creation, get_user_model().objects.all()[0].last_login)
-        self.assertLess(get_user_model().objects.all()[0].last_login, after_creation)
+        # Check date_joined and last_login dates
+        self.assertEqual(get_user_model().objects.all()[0].date_joined, right_now)
+        self.assertEqual(get_user_model().objects.all()[0].last_login, right_now)
 
         # Check flags
         self.assertTrue(get_user_model().objects.all()[0].is_active)

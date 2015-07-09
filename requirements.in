@@ -1,0 +1,4 @@
+coveralls==1.0
+pip-tools==1.1.6
+tox==2.1.1
+wheel==0.26.0
