@@ -6,6 +6,7 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.middleware import AuthenticationMiddleware
 from django.core import mail
+from django.core import management
 from django.core.urlresolvers import reverse
 from django.forms.fields import Field
 from django.http import HttpRequest
@@ -166,6 +167,20 @@ class UserManagerTest(TestCase):
             'The given email must be set',
             get_user_model().objects.create_user, email=''
         )
+
+
+@skipIf(django.VERSION < (1, 7, 0), 'Migrations not available in this Django version')
+class MigrationsTest(TestCase):
+
+    def test_makemigrations_no_changes(self):
+        try:
+            from StringIO import StringIO
+        except ImportError:
+            from io import StringIO
+
+        with patch('sys.stdout', new_callable=StringIO) as mock:
+            management.call_command('makemigrations', 'custom_user', dry_run=True)
+        self.assertEqual(mock.getvalue(), 'No changes detected in app \'custom_user\'\n')
 
 
 @skipIf(SessionAuthenticationMiddleware is None, "SessionAuthenticationMiddleware not available in this version")
