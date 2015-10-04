@@ -31,8 +31,8 @@ install:
 
 # command to run tests using coverage, e.g. python setup.py test
 script:
-  - if [[ $DJANGO_VERSION != 'pylama' ]]; then coverage run --source custom_user `which django-admin.py` test custom_user --settings=test_settings.settings; fi
-  - if [[ $DJANGO_VERSION != 'pylama' ]]; then coverage run --append --source custom_user `which django-admin.py` test custom_user --settings=test_settings.settings_subclass; fi
+  - if [[ $DJANGO_VERSION != 'pylama' ]]; then coverage run --source custom_user `which django-admin.py` test custom_user --noinput --settings=test_settings.settings; fi
+  - if [[ $DJANGO_VERSION != 'pylama' ]]; then coverage run --append --source custom_user `which django-admin.py` test custom_user --noinput --settings=test_settings.settings_subclass; fi
   - if [[ $DJANGO_VERSION == 'pylama' ]]; then pylama; fi
 
 # report coverage to coveralls.io
