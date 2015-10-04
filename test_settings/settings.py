@@ -18,6 +18,16 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
 )
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [],
+        'APP_DIRS': True,
+        'OPTIONS': {
+            'context_processors': [],
+        },
+    },
+]
 SECRET_KEY = 'not_random'
 ROOT_URLCONF = 'test_settings.urls'
 AUTH_USER_MODEL = 'custom_user.EmailUser'
