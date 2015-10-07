@@ -22,7 +22,7 @@ Quick start
 
 1. Install django-custom-user with your favorite Python package manager:
 
-.. code-block:: python
+.. code-block:: sh
 
     pip install django-custom-user
 
@@ -44,9 +44,34 @@ Quick start
     AUTH_USER_MODEL = 'custom_user.EmailUser'
 
 
-4. Create the database tables.
+4. **If you're using Django 1.7+**, you'll have to create migrations for
+   ``django-custom-user`` within your working directory:
 
-.. code-block:: python
+   1. Create the package directory for the migration module:
+
+      .. code:: sh
+
+          mkdir [project_dir]/custom_user_migrations
+
+   2. Tell Django where the migration package is by adding the following
+      setting to ``settings.py``:
+
+      .. code:: python
+
+          MIGRATION_MODULES = {
+              'custom_user': '[project_package].custom_user_migrations'
+          }
+
+   3. Create the migration:
+
+      .. code:: sh
+
+          python manage.py makemigrations custom_user
+
+
+5. Create the database tables.
+
+.. code-block:: sh
 
     python manage.py syncdb
 
