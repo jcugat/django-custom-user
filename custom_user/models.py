@@ -1,10 +1,22 @@
 """User models."""
+import django
 from django.contrib.auth.models import (
     AbstractBaseUser, BaseUserManager, PermissionsMixin)
 from django.core.mail import send_mail
 from django.db import models
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
+
+
+# Monkey patch Django 1.7 to avoid detecting migrations
+if django.VERSION[:2] == (1, 7):
+    last_login = AbstractBaseUser._meta.get_field('last_login')
+    last_login.blank = True
+    last_login.null = True
+    last_login.default = models.fields.NOT_PROVIDED
+    groups = PermissionsMixin._meta.get_field('groups')
+    groups.help_text = _('The groups this user belongs to. A user will get '
+                         'all permissions granted to each of their groups.')
 
 
 class EmailUserManager(BaseUserManager):
