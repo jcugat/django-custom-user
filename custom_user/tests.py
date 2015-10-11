@@ -8,6 +8,7 @@ from django.contrib.auth.middleware import AuthenticationMiddleware
 from django.core import mail
 from django.core import management
 from django.core.urlresolvers import reverse
+from django.db import connection
 from django.forms.fields import Field
 from django.http import HttpRequest
 from django.test import TestCase
@@ -25,10 +26,10 @@ except ImportError:
     SessionAuthenticationMiddleware = None
 
 try:
-    from unittest import skipIf
+    from unittest import skipIf, skipUnless
 except ImportError:
     # Only available from Python 2.7, import Django's bundled version otherwise
-    from django.utils.unittest import skipIf
+    from django.utils.unittest import skipIf, skipUnless
 
 
 class UserTest(TestCase):
@@ -181,6 +182,28 @@ class MigrationsTest(TestCase):
         with patch('sys.stdout', new_callable=StringIO) as mock:
             management.call_command('makemigrations', 'custom_user', dry_run=True)
         self.assertEqual(mock.getvalue(), 'No changes detected in app \'custom_user\'\n')
+
+    @skipUnless(django.VERSION[:2] == (1, 7), 'Monkey patch only applied to Django 1.7')
+    def test_monkey_patch_model_field(self):
+        field_last_login = get_user_model()._meta.get_field('last_login')
+        self.assertTrue(field_last_login.null)
+        self.assertTrue(field_last_login.blank)
+
+    @skipUnless(django.VERSION[:2] == (1, 7), 'Monkey patch only applied to Django 1.7')
+    def test_monkey_patch_db_column(self):
+        table_name = get_user_model()._meta.db_table
+        cursor = connection.cursor()
+        table_fields = connection.introspection.get_table_description(cursor, table_name)
+        field = next(field for field in table_fields if field.name == 'last_login')
+        self.assertTrue(field.null_ok)
+
+    @skipUnless(django.VERSION[:2] == (1, 7), 'Monkey patch only applied to Django 1.7')
+    def test_monkey_patch_side_effects(self):
+        # Check the parent model isn't affected from the monkey patch
+        from django.contrib.auth.models import AbstractBaseUser
+        field_last_login = AbstractBaseUser._meta.get_field('last_login')
+        self.assertFalse(field_last_login.null)
+        self.assertFalse(field_last_login.blank)
 
 
 @skipIf(SessionAuthenticationMiddleware is None, "SessionAuthenticationMiddleware not available in this version")

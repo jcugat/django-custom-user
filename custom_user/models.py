@@ -8,17 +8,6 @@ from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 
 
-# Monkey patch Django 1.7 to avoid detecting migrations
-if django.VERSION[:2] == (1, 7):
-    last_login = AbstractBaseUser._meta.get_field('last_login')
-    last_login.blank = True
-    last_login.null = True
-    last_login.default = models.fields.NOT_PROVIDED
-    groups = PermissionsMixin._meta.get_field('groups')
-    groups.help_text = _('The groups this user belongs to. A user will get '
-                         'all permissions granted to each of their groups.')
-
-
 class EmailUserManager(BaseUserManager):
 
     """Custom manager for EmailUser."""
@@ -120,6 +109,17 @@ class AbstractEmailUser(AbstractBaseUser, PermissionsMixin):
     def email_user(self, subject, message, from_email=None, **kwargs):
         """Send an email to this User."""
         send_mail(subject, message, from_email, [self.email], **kwargs)
+
+
+# Monkey patch Django 1.7 to avoid detecting migrations
+if django.VERSION[:2] == (1, 7):
+    last_login = AbstractEmailUser._meta.get_field('last_login')
+    last_login.blank = True
+    last_login.null = True
+    last_login.default = models.fields.NOT_PROVIDED
+    groups = AbstractEmailUser._meta.get_field('groups')
+    groups.help_text = _('The groups this user belongs to. A user will get '
+                         'all permissions granted to each of their groups.')
 
 
 class EmailUser(AbstractEmailUser):
