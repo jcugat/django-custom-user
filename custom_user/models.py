@@ -78,7 +78,7 @@ class AbstractEmailUser(AbstractBaseUser, PermissionsMixin):
 
     """
 
-    email = models.EmailField(_('email address'), max_length=255,
+    email = models.EmailField(_('email address'), max_length=254,
                               unique=True, db_index=True)
     is_staff = models.BooleanField(
         _('staff status'), default=False, help_text=_(
