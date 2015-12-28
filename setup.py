@@ -32,6 +32,7 @@ setup(
     url='https://github.com/jcugat/django-custom-user',
     packages=[
         'custom_user',
+        'custom_user.migrations',
     ],
     include_package_data=True,
     install_requires=[
