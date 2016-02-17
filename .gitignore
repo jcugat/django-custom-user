@@ -3,6 +3,8 @@
 
 # Packaging files
 *.egg*
+build
+dist
 
 # Unit test / coverage reports
 .coverage
