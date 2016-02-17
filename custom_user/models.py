@@ -6,6 +6,7 @@ from django.core.mail import send_mail
 from django.db import models
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
+from django.conf import settings
 
 
 class EmailUserManager(BaseUserManager):
@@ -77,9 +78,12 @@ class AbstractEmailUser(AbstractBaseUser, PermissionsMixin):
         * is_superuser
 
     """
-
-    email = models.EmailField(_('email address'), max_length=255,
-                              unique=True, db_index=True)
+    if settings.DATABASES['default']['ENGINE'] == 'django.db.backends.mysql':
+        email = models.EmailField(_('email address'), max_length=191,
+                                  unique=True)
+    else:
+        email = models.EmailField(_('email address'), max_length=255,
+                                  unique=True)
     is_staff = models.BooleanField(
         _('staff status'), default=False, help_text=_(
             'Designates whether the user can log into this admin site.'))
