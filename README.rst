@@ -125,8 +125,8 @@ If you use the AdminSite, add the following code to your ``my_app/admin.py`` fil
 Changelog
 ---------
 
-Version 0.6 (In development)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Version 0.6 (2016-04-03)
+~~~~~~~~~~~~~~~~~~~~~~~~
 
 - Added migrations (thanks to everybody for the help).
 
