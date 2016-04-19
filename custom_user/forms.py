@@ -89,6 +89,7 @@ else:
 
 
 class EmailUserChangeForm(forms.ModelForm):
+
     """A form for updating users.
 
     Includes all the fields on the user, but replaces the password field
