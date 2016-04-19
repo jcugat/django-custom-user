@@ -89,6 +89,13 @@ else:
 
 
 class EmailUserChangeForm(forms.ModelForm):
+    """A form for updating users.
+
+    Includes all the fields on the user, but replaces the password field
+    with admin's password hash display field.
+
+    """
+
     password = ReadOnlyPasswordHashField(
         label=_("Password"),
         help_text=_(
@@ -103,14 +110,20 @@ class EmailUserChangeForm(forms.ModelForm):
         exclude = ()
 
     def __init__(self, *args, **kwargs):
+        """Init the form."""
         super(EmailUserChangeForm, self).__init__(*args, **kwargs)
         f = self.fields.get('user_permissions')
         if f is not None:
             f.queryset = f.queryset.select_related('content_type')
 
     def clean_password(self):
-        # Regardless of what the user provides, return the initial value.
-        # This is done here, rather than on the field, because the
-        # field does not have access to the initial value
-        return self.initial["password"]
+        """Clean password.
 
+        Regardless of what the user provides, return the initial value.
+        This is done here, rather than on the field, because the
+        field does not have access to the initial value.
+
+        :return str password:
+
+        """
+        return self.initial["password"]
