@@ -1,7 +1,8 @@
 """EmailUser forms."""
+import django
 from django import forms
 from django.contrib.auth import get_user_model
-from django.contrib.auth.forms import UserChangeForm
+from django.contrib.auth.forms import ReadOnlyPasswordHashField
 from django.utils.translation import ugettext_lazy as _
 
 
@@ -80,6 +81,36 @@ class EmailUserCreationForm(forms.ModelForm):
         return user
 
 
-class EmailUserChangeForm(UserChangeForm):
-    class Meta(UserChangeForm.Meta):
+# Different password reset link in Django 1.9
+if django.VERSION[:2] < (1, 9):
+    password_reset_link = "password"
+else:
+    password_reset_link = "../password"
+
+
+class EmailUserChangeForm(forms.ModelForm):
+    password = ReadOnlyPasswordHashField(
+        label=_("Password"),
+        help_text=_(
+            "Raw passwords are not stored, so there is no way to see this "
+            "user's password, but you can change the password using "
+            "<a href=\"{}/\">this form</a>.".format(password_reset_link)
+        ),
+    )
+
+    class Meta:
         model = get_user_model()
+        fields = '__all__'
+
+    def __init__(self, *args, **kwargs):
+        super(EmailUserChangeForm, self).__init__(*args, **kwargs)
+        f = self.fields.get('user_permissions')
+        if f is not None:
+            f.queryset = f.queryset.select_related('content_type')
+
+    def clean_password(self):
+        # Regardless of what the user provides, return the initial value.
+        # This is done here, rather than on the field, because the
+        # field does not have access to the initial value
+        return self.initial["password"]
+
