@@ -94,13 +94,13 @@ class EmailUserChangeForm(forms.ModelForm):
         help_text=_(
             "Raw passwords are not stored, so there is no way to see this "
             "user's password, but you can change the password using "
-            "<a href=\"{}/\">this form</a>.".format(password_reset_link)
+            "<a href=\"{0}/\">this form</a>.".format(password_reset_link)
         ),
     )
 
     class Meta:
         model = get_user_model()
-        fields = '__all__'
+        exclude = ()
 
     def __init__(self, *args, **kwargs):
         super(EmailUserChangeForm, self).__init__(*args, **kwargs)
