@@ -1,4 +1,5 @@
 """EmailUser forms."""
+import django
 from django import forms
 from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import ReadOnlyPasswordHashField
@@ -80,6 +81,13 @@ class EmailUserCreationForm(forms.ModelForm):
         return user
 
 
+# Different password reset link in Django 1.9
+if django.VERSION[:2] < (1, 9):
+    password_reset_link = "password"
+else:
+    password_reset_link = "../password"
+
+
 class EmailUserChangeForm(forms.ModelForm):
 
     """A form for updating users.
@@ -89,10 +97,14 @@ class EmailUserChangeForm(forms.ModelForm):
 
     """
 
-    password = ReadOnlyPasswordHashField(label=_("Password"), help_text=_(
-        "Raw passwords are not stored, so there is no way to see "
-        "this user's password, but you can change the password "
-        "using <a href=\"password/\">this form</a>."))
+    password = ReadOnlyPasswordHashField(
+        label=_("Password"),
+        help_text=_(
+            "Raw passwords are not stored, so there is no way to see this "
+            "user's password, but you can change the password using "
+            "<a href=\"{0}/\">this form</a>.".format(password_reset_link)
+        ),
+    )
 
     class Meta:
         model = get_user_model()
@@ -101,7 +113,7 @@ class EmailUserChangeForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         """Init the form."""
         super(EmailUserChangeForm, self).__init__(*args, **kwargs)
-        f = self.fields.get('user_permissions', None)
+        f = self.fields.get('user_permissions')
         if f is not None:
             f.queryset = f.queryset.select_related('content_type')
 
