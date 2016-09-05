@@ -4,6 +4,8 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import ReadOnlyPasswordHashField
 from django.utils.translation import ugettext_lazy as _
 
+import django
+
 
 class EmailUserCreationForm(forms.ModelForm):
 
@@ -89,10 +91,14 @@ class EmailUserChangeForm(forms.ModelForm):
 
     """
 
+    # In Django 1.9 the url for changing the password was changed (#15779)
+    # A url name was also added in 1.9 (same issue #15779),
+    # so reversing the url is not possible for Django < 1.9
     password = ReadOnlyPasswordHashField(label=_("Password"), help_text=_(
         "Raw passwords are not stored, so there is no way to see "
         "this user's password, but you can change the password "
-        "using <a href=\"password/\">this form</a>."))
+        "using <a href=\"%(url)s\">this form</a>."
+    ) % {'url': '../password/' if django.VERSION >= (1, 9) else 'password/'})
 
     class Meta:
         model = get_user_model()
