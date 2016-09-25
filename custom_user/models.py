@@ -93,7 +93,7 @@ class AbstractEmailUser(AbstractBaseUser, PermissionsMixin):
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
 
-    class Meta:
+    class Meta:  # noqa: D101
         verbose_name = _('user')
         verbose_name_plural = _('users')
         abstract = True
@@ -131,5 +131,5 @@ class EmailUser(AbstractEmailUser):
 
     """
 
-    class Meta(AbstractEmailUser.Meta):
+    class Meta(AbstractEmailUser.Meta):  # noqa: D101
         swappable = 'AUTH_USER_MODEL'

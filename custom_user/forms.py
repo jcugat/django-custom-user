@@ -27,7 +27,7 @@ class EmailUserCreationForm(forms.ModelForm):
         widget=forms.PasswordInput,
         help_text=_("Enter the same password as above, for verification."))
 
-    class Meta:
+    class Meta:  # noqa: D101
         model = get_user_model()
         fields = ('email',)
 
@@ -99,7 +99,7 @@ class EmailUserChangeForm(forms.ModelForm):
         "using <a href=\"%(url)s\">this form</a>."
     ) % {'url': 'password/' if django.VERSION < (1, 9) else '../password/'})
 
-    class Meta:
+    class Meta:  # noqa: D101
         model = get_user_model()
         exclude = ()
 
