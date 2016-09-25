@@ -118,5 +118,6 @@ install:
 # command to run tests using coverage, e.g. python setup.py test
 script: tox -e $TOX_ENV
 
-# report coverage to coveralls.io
-after_success: coveralls
+# report coverage to codecov.io
+after_success:
+  - bash <(curl -s https://codecov.io/bash)

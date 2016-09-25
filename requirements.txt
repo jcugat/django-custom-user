@@ -5,14 +5,11 @@
 #    pip-compile --output-file requirements.txt requirements.in
 #
 click==6.6                # via pip-tools
-coverage==4.2             # via coveralls
-coveralls==1.1
-docopt==0.6.2             # via coveralls
+coverage==4.2
 first==2.0.1              # via pip-tools
 pip-tools==1.7.0
 pluggy==0.3.1             # via tox
 py==1.4.31                # via tox
-requests==2.11.1          # via coveralls
 six==1.10.0               # via pip-tools
 tox==2.3.1
 virtualenv==15.0.3        # via tox
