@@ -2,6 +2,7 @@
 from mock import patch
 import os
 import re
+from unittest import skipIf, skipUnless
 
 import django
 from django.conf import settings
@@ -26,12 +27,6 @@ try:
 except ImportError:
     # Only available from Django 1.7, ignore the tests otherwise
     SessionAuthenticationMiddleware = None
-
-try:
-    from unittest import skipIf, skipUnless
-except ImportError:
-    # Only available from Python 2.7, import Django's bundled version otherwise
-    from django.utils.unittest import skipIf, skipUnless
 
 
 class UserTest(TestCase):
