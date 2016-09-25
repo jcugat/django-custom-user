@@ -125,6 +125,11 @@ If you use the AdminSite, add the following code to your ``my_app/admin.py`` fil
 Changelog
 ---------
 
+Version 0.7 (In development)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+- Fixed change password link in EmailUserChangeForm (thanks to Igor Gai and rubengrill)
+
 Version 0.6 (2016-04-03)
 ~~~~~~~~~~~~~~~~~~~~~~~~
 

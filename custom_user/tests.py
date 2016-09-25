@@ -1,5 +1,7 @@
 """EmailUser tests."""
 from mock import patch
+import os
+import re
 
 import django
 from django.conf import settings
@@ -477,3 +479,34 @@ class EmailUserAdminTest(TestCase):
 
         response = self.client.get(reverse("admin:app_list", args=(self.app_name,)))
         self.assertEqual(force_text(response.context['app_list'][0]['models'][0]['name']), self.model_verbose_name_plural)
+
+    def test_user_change_password(self):
+        self.assertTrue(self.client.login(
+            username=self.user_email,
+            password=self.user_password,
+        ))
+
+        user_change_url = reverse('admin:%s_%s_change' % (self.app_name, self.model_name), args=(self.user.pk,))
+
+        if django.VERSION[:2] < (1, 8):
+            # Since reverse() does not exist yet, create path manually
+            password_change_url = user_change_url + 'password/'
+        else:
+            password_change_url = reverse('admin:auth_user_password_change', args=(self.user.pk,))
+
+        response = self.client.get(user_change_url)
+        # Test the link inside password field help_text.
+        rel_link = re.search(
+            r'you can change the password using <a href="([^"]*)">this form</a>',
+            force_text(response.content)
+        ).groups()[0]
+        self.assertEqual(
+            os.path.normpath(user_change_url + rel_link),
+            os.path.normpath(password_change_url)
+        )
+
+        # Test url is correct.
+        self.assertEqual(
+            self.client.get(password_change_url).status_code,
+            200,
+        )

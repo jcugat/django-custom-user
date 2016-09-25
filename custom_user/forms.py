@@ -1,10 +1,9 @@
 """EmailUser forms."""
+import django
 from django import forms
 from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import ReadOnlyPasswordHashField
 from django.utils.translation import ugettext_lazy as _
-
-import django
 
 
 class EmailUserCreationForm(forms.ModelForm):
@@ -98,7 +97,7 @@ class EmailUserChangeForm(forms.ModelForm):
         "Raw passwords are not stored, so there is no way to see "
         "this user's password, but you can change the password "
         "using <a href=\"%(url)s\">this form</a>."
-    ) % {'url': '../password/' if django.VERSION >= (1, 9) else 'password/'})
+    ) % {'url': 'password/' if django.VERSION < (1, 9) else '../password/'})
 
     class Meta:
         model = get_user_model()
