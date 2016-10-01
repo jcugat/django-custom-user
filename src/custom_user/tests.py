@@ -191,7 +191,7 @@ class MigrationsTest(TestCase):
         table_name = get_user_model()._meta.db_table
         cursor = connection.cursor()
         table_fields = connection.introspection.get_table_description(cursor, table_name)
-        field = next(field for field in table_fields if field.name == 'last_login')
+        field = next(field for field in table_fields if field.name == 'last_login')  # pragma: no cover
         self.assertTrue(field.null_ok)
 
     @skipUnless(django.VERSION[:2] == (1, 7), 'Monkey patch only applied to Django 1.7')
@@ -320,6 +320,20 @@ class EmailUserCreationFormTest(TestCase):
         self.assertTrue(form.is_valid())
         u = form.save()
         self.assertEqual(repr(u), '<%s: jsmith@example.com>' % get_user_model().__name__)
+        self.assertIsNotNone(u.pk)
+
+    def test_success_without_commit(self):
+        # The success case, but without saving the user instance to the db.
+        data = {
+            'email': 'jsmith@example.com',
+            'password1': 'test123',
+            'password2': 'test123',
+        }
+        form = EmailUserCreationForm(data)
+        self.assertTrue(form.is_valid())
+        u = form.save(commit=False)
+        self.assertEqual(repr(u), '<%s: jsmith@example.com>' % get_user_model().__name__)
+        self.assertIsNone(u.pk, None)
 
 
 @override_settings(USE_TZ=False, PASSWORD_HASHERS=('django.contrib.auth.hashers.SHA1PasswordHasher',))
@@ -430,7 +444,7 @@ class EmailUserAdminTest(TestCase):
                 self.app_verbose_name = "Custom_User"
             else:
                 self.app_verbose_name = "Custom User"
-        elif settings.AUTH_USER_MODEL == "test_custom_user_subclass.MyCustomEmailUser":
+        if settings.AUTH_USER_MODEL == "test_custom_user_subclass.MyCustomEmailUser":
             self.app_name = "test_custom_user_subclass"
             self.model_name = "mycustomemailuser"
             self.model_verbose_name = "MyCustomEmailUserVerboseName"

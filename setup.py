@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import os
-from setuptools import setup
+from setuptools import find_packages, setup
 import sys
 
 if sys.argv[-1] == 'publish':
@@ -26,10 +26,8 @@ setup(
     author='Josep Cugat',
     author_email='jcugat@gmail.com',
     url='https://github.com/jcugat/django-custom-user',
-    packages=[
-        'custom_user',
-        'custom_user.migrations',
-    ],
+    packages=find_packages('src'),
+    package_dir={'': 'src'},
     include_package_data=True,
     install_requires=[
         "Django >= 1.5",

@@ -123,7 +123,7 @@ matrix:
       env: TOX_ENV="py35-djangomaster-postgres"
     - python: "3.5"
       env: TOX_ENV="py35-djangomaster-sqlite"
-    - python: "3.4"
+    - python: "3.5"
       env: TOX_ENV="pylama"
 
   # Put all *-djangomaster-* here
@@ -147,4 +147,5 @@ script: tox -e $TOX_ENV
 
 # report coverage to codecov.io
 after_success:
+  - tox -e coverage
   - bash <(curl -s https://codecov.io/bash)

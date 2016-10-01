@@ -7,8 +7,9 @@ build
 dist
 
 # Unit test / coverage reports
-.coverage
-.tox
+/.coverage
+/.coverage.*
+/.tox
 
 # Editor temp files
 *.swp
