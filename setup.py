@@ -1,23 +1,18 @@
-# -*- coding: utf-8 -*-
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 import os
+from setuptools import setup
 import sys
 
-import custom_user
-
-try:
-    from setuptools import setup
-except ImportError:
-    from distutils.core import setup
-
-version = custom_user.__version__
-
 if sys.argv[-1] == 'publish':
-    os.system('python setup.py sdist bdist_wheel')
-    os.system('twine upload dist/*')
-    print("You probably want to also tag the version now:")
-    print("  git tag -a %s -m 'version %s'" % (version, version))
+    print("Remember to update the Changelog's version and date in README.rst and stage the changes")
+    input("Press Enter to continue...")
+    os.system("bumpversion --allow-dirty minor")
+    os.system("python setup.py sdist bdist_wheel")
+    os.system("twine upload dist/*")
+    print("You probably want to update the repo now:")
+    print("  git push origin master")
     print("  git push --tags")
     sys.exit()
 
@@ -25,7 +20,7 @@ readme = open('README.rst').read()
 
 setup(
     name='django-custom-user',
-    version=version,
+    version='0.7',
     description="""Custom user model for Django >= 1.5 with the same behaviour as Django's default User but with email instead of username.""",
     long_description=readme,
     author='Josep Cugat',

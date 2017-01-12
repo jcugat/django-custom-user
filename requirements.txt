@@ -5,6 +5,7 @@
 #    pip-compile --output-file requirements.txt requirements.in
 #
 args==0.1.0               # via clint
+bumpversion==0.5.3
 click==6.7                # via pip-tools
 clint==0.5.1              # via twine
 coverage==4.3.1
