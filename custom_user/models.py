@@ -14,7 +14,8 @@ class EmailUserManager(BaseUserManager):
 
     def _create_user(self, email, password,
                      is_staff, is_superuser, **extra_fields):
-        """Create and save an EmailUser with the given email and password.
+        """
+        Create and save an EmailUser with the given email and password.
 
         :param str email: user email
         :param str password: user password
@@ -37,7 +38,8 @@ class EmailUserManager(BaseUserManager):
         return user
 
     def create_user(self, email, password=None, **extra_fields):
-        """Create and save an EmailUser with the given email and password.
+        """
+        Create and save an EmailUser with the given email and password.
 
         :param str email: user email
         :param str password: user password
@@ -49,7 +51,8 @@ class EmailUserManager(BaseUserManager):
                                  **extra_fields)
 
     def create_superuser(self, email, password, **extra_fields):
-        """Create and save an EmailUser with the given email and password.
+        """
+        Create and save an EmailUser with the given email and password.
 
         :param str email: user email
         :param str password: user password
@@ -62,7 +65,8 @@ class EmailUserManager(BaseUserManager):
 
 class AbstractEmailUser(AbstractBaseUser, PermissionsMixin):
 
-    """Abstract User with the same behaviour as Django's default User.
+    """
+    Abstract User with the same behaviour as Django's default User.
 
     AbstractEmailUser does not have username field. Uses email as the
     USERNAME_FIELD for authentication.

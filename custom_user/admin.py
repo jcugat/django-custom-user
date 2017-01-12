@@ -38,5 +38,6 @@ class EmailUserAdmin(UserAdmin):
     ordering = ('email',)
     filter_horizontal = ('groups', 'user_permissions',)
 
+
 # Register the new EmailUserAdmin
 admin.site.register(EmailUser, EmailUserAdmin)

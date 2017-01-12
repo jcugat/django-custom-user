@@ -8,7 +8,8 @@ from django.utils.translation import ugettext_lazy as _
 
 class EmailUserCreationForm(forms.ModelForm):
 
-    """A form for creating new users.
+    """
+    A form for creating new users.
 
     Includes all the required fields, plus a repeated password.
 
@@ -32,7 +33,8 @@ class EmailUserCreationForm(forms.ModelForm):
         fields = ('email',)
 
     def clean_email(self):
-        """Clean form email.
+        """
+        Clean form email.
 
         :return str email: cleaned email
         :raise forms.ValidationError: Email is duplicated
@@ -51,7 +53,8 @@ class EmailUserCreationForm(forms.ModelForm):
         )
 
     def clean_password2(self):
-        """Check that the two password entries match.
+        """
+        Check that the two password entries match.
 
         :return str password2: cleaned password2
         :raise forms.ValidationError: password2 != password1
@@ -67,7 +70,8 @@ class EmailUserCreationForm(forms.ModelForm):
         return password2
 
     def save(self, commit=True):
-        """Save user.
+        """
+        Save user.
 
         Save the provided password in hashed format.
 
@@ -83,7 +87,8 @@ class EmailUserCreationForm(forms.ModelForm):
 
 class EmailUserChangeForm(forms.ModelForm):
 
-    """A form for updating users.
+    """
+    A form for updating users.
 
     Includes all the fields on the user, but replaces the password field
     with admin's password hash display field.
@@ -111,7 +116,8 @@ class EmailUserChangeForm(forms.ModelForm):
             f.queryset = f.queryset.select_related('content_type')
 
     def clean_password(self):
-        """Clean password.
+        """
+        Clean password.
 
         Regardless of what the user provides, return the initial value.
         This is done here, rather than on the field, because the
