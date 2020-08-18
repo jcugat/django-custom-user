@@ -100,7 +100,6 @@ class AbstractEmailUser(AbstractBaseUser, PermissionsMixin):
     class Meta:  # noqa: D101
         verbose_name = _('user')
         verbose_name_plural = _('users')
-        abstract = True
 
     def get_full_name(self):
         """Return the email."""
