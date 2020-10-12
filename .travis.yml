@@ -6,6 +6,9 @@ sudo: false
 
 language: python
 
+services:
+  - mysql
+
 addons:
   postgresql: "9.4"
 
