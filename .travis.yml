@@ -1,10 +1,9 @@
 # Config file for automatic testing at travis-ci.org
 
-# Use container-based infrastructure
-# http://docs.travis-ci.com/user/migrating-from-legacy/
-sudo: false
-
 language: python
+
+services:
+  - mysql
 
 addons:
   postgresql: "9.4"
