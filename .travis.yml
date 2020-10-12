@@ -12,7 +12,7 @@ env:
   global:
     - PYTHONPATH=$TRAVIS_BUILD_DIR
 
-matrix:
+jobs:
   include:
     - python: "2.7"
       env: TOX_ENV="py27-django15-mysql"
