@@ -4,23 +4,42 @@
 #
 #    pip-compile --output-file requirements.txt requirements.in
 #
-args==0.1.0               # via clint
+args==0.1.0
+    # via clint
 bumpversion==0.5.3
-click==6.7                # via pip-tools
-clint==0.5.1              # via twine
+    # via -r requirements.in
+click==6.7
+    # via pip-tools
+clint==0.5.1
+    # via twine
 coverage==4.3.1
-first==2.0.1              # via pip-tools
+    # via -r requirements.in
+first==2.0.1
+    # via pip-tools
 pip-tools==1.8.0
-pkginfo==1.4.1            # via twine
-pluggy==0.4.0             # via tox
-py==1.4.32                # via tox
-requests-toolbelt==0.7.0  # via twine
-requests==2.12.4          # via requests-toolbelt, twine
-six==1.10.0               # via pip-tools
+    # via -r requirements.in
+pkginfo==1.4.1
+    # via twine
+pluggy==0.4.0
+    # via tox
+py==1.10.0
+    # via tox
+requests-toolbelt==0.7.0
+    # via twine
+requests==2.12.4
+    # via
+    #   requests-toolbelt
+    #   twine
+six==1.10.0
+    # via pip-tools
 tox==2.5.0
+    # via -r requirements.in
 twine==1.8.1
-virtualenv==15.1.0        # via tox
+    # via -r requirements.in
+virtualenv==15.1.0
+    # via tox
 wheel==0.29.0
+    # via -r requirements.in
 
 # The following packages are considered to be unsafe in a requirements file:
-# setuptools                # via twine
+# setuptools
