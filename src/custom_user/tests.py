@@ -10,7 +10,6 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.middleware import AuthenticationMiddleware
 from django.core import mail
 from django.core import management
-from django.core.urlresolvers import reverse
 from django.db import connection
 from django.forms.fields import Field
 from django.http import HttpRequest
@@ -18,7 +17,16 @@ from django.test import TestCase
 from django.test.utils import override_settings
 from django.utils import timezone
 from django.utils.encoding import force_text
-from django.utils.translation import ugettext as _
+
+if django.VERSION < (2, 0):
+    from django.core.urlresolvers import reverse
+else:
+    from django.urls import reverse
+
+if django.VERSION < (3, 0):
+    from django.utils.translation import ugettext as _
+else:
+    from django.utils.translation import gettext as _
 
 from .forms import EmailUserChangeForm, EmailUserCreationForm
 
