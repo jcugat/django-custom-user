@@ -1,8 +1,8 @@
 """EmailUser tests."""
-from mock import patch
 import os
 import re
 from unittest import skipIf, skipUnless
+from unittest.mock import patch
 
 import django
 from django.conf import settings
@@ -15,18 +15,10 @@ from django.forms.fields import Field
 from django.http import HttpRequest
 from django.test import TestCase
 from django.test.utils import override_settings
+from django.urls import reverse
 from django.utils import timezone
-from django.utils.encoding import force_text
-
-if django.VERSION < (2, 0):
-    from django.core.urlresolvers import reverse
-else:
-    from django.urls import reverse
-
-if django.VERSION < (3, 0):
-    from django.utils.translation import ugettext as _
-else:
-    from django.utils.translation import gettext as _
+from django.utils.encoding import force_str
+from django.utils.translation import gettext as _
 
 from .forms import EmailUserChangeForm, EmailUserCreationForm
 
@@ -277,7 +269,7 @@ class EmailUserCreationFormTest(TestCase):
         form = EmailUserCreationForm(data)
         self.assertFalse(form.is_valid())
         self.assertEqual(form["email"].errors,
-                         [force_text(form.error_messages['duplicate_email'])])
+                         [force_str(form.error_messages['duplicate_email'])])
 
     def test_invalid_data(self):
         data = {
@@ -300,13 +292,13 @@ class EmailUserCreationFormTest(TestCase):
         form = EmailUserCreationForm(data)
         self.assertFalse(form.is_valid())
         self.assertEqual(form["password2"].errors,
-                         [force_text(form.error_messages['password_mismatch'])])
+                         [force_str(form.error_messages['password_mismatch'])])
 
     def test_both_passwords(self):
         # One (or both) passwords weren't given
         data = {'email': 'testclient@example.com'}
         form = EmailUserCreationForm(data)
-        required_error = [force_text(Field.default_error_messages['required'])]
+        required_error = [force_str(Field.default_error_messages['required'])]
         self.assertFalse(form.is_valid())
         self.assertEqual(form['password1'].errors, required_error)
         self.assertEqual(form['password2'].errors, required_error)
@@ -486,7 +478,7 @@ class EmailUserAdminTest(TestCase):
         ))
 
         response = self.client.get(reverse("admin:%s_%s_changelist" % (self.app_name, self.model_name)))
-        self.assertEqual(force_text(response.context['title']), "Select %s to change" % self.model_verbose_name)
+        self.assertEqual(force_str(response.context['title']), "Select %s to change" % self.model_verbose_name)
 
     def test_model_name_plural(self):
         self.assertTrue(self.client.login(
@@ -495,7 +487,7 @@ class EmailUserAdminTest(TestCase):
         ))
 
         response = self.client.get(reverse("admin:app_list", args=(self.app_name,)))
-        self.assertEqual(force_text(response.context['app_list'][0]['models'][0]['name']), self.model_verbose_name_plural)
+        self.assertEqual(force_str(response.context['app_list'][0]['models'][0]['name']), self.model_verbose_name_plural)
 
     def test_user_change_password(self):
         self.assertTrue(self.client.login(
@@ -515,7 +507,7 @@ class EmailUserAdminTest(TestCase):
         # Test the link inside password field help_text.
         rel_link = re.search(
             r'you can change the password using <a href="([^"]*)">this form</a>',
-            force_text(response.content)
+            force_str(response.content)
         ).groups()[0]
         self.assertEqual(
             os.path.normpath(user_change_url + rel_link),

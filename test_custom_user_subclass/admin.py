@@ -6,6 +6,5 @@ from .models import MyCustomEmailUser
 class MyCustomEmailUserAdmin(EmailUserAdmin):
     pass
 
-
 # Register your models here.
 admin.site.register(MyCustomEmailUser, MyCustomEmailUserAdmin)
