@@ -2,13 +2,18 @@
 # For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
 # Also used as inspiration: https://hynek.me/articles/python-github-actions/
 
-name: Python package
+name: CI
 
 on:
   push:
     branches: [ main ]
   pull_request:
     branches: [ main ]
+
+env:
+  # Make tools pretty.
+  FORCE_COLOR: "1"
+  TOX_TESTENV_PASSENV: FORCE_COLOR
 
 jobs:
   build:
