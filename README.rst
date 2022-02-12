@@ -119,10 +119,12 @@ Supported versions
 ------------------
 
 Django:
+
 - 3.2 LTS
 - 4.0
 
 Python:
+
 - 3.7
 - 3.8
 - 3.9
