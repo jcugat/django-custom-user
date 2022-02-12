@@ -95,9 +95,6 @@ class EmailUserChangeForm(forms.ModelForm):
 
     """
 
-    # In Django 1.9 the url for changing the password was changed (#15779)
-    # A url name was also added in 1.9 (same issue #15779),
-    # so reversing the url is not possible for Django < 1.9
     password = ReadOnlyPasswordHashField(label=_("Password"), help_text=_(
         "Raw passwords are not stored, so there is no way to see "
         "this user's password, but you can change the password "
