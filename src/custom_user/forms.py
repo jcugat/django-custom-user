@@ -3,11 +3,7 @@ import django
 from django import forms
 from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import ReadOnlyPasswordHashField
-
-if django.VERSION < (3, 0):
-    from django.utils.translation import ugettext_lazy as _
-else:
-    from django.utils.translation import gettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 
 class EmailUserCreationForm(forms.ModelForm):

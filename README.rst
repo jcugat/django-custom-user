@@ -13,7 +13,7 @@ Django Custom User
    :target: https://pypi.python.org/pypi/django-custom-user
 
 
-Custom user model for Django >= 1.5 with the same behaviour as Django's default User but without a username field. Uses email as the USERNAME_FIELD for authentication.
+Custom user model for Django with the same behaviour as the default User class but without a username field. Uses email as the USERNAME_FIELD for authentication.
 
 
 Quick start
@@ -48,12 +48,6 @@ Quick start
 .. code-block::
 
     python manage.py migrate
-
-Or if you are using an old Django version (<=1.6):
-
-.. code-block::
-
-    python manage.py syncdb
 
 
 Usage
@@ -119,6 +113,20 @@ If you use the AdminSite, add the following code to your ``my_app/admin.py`` fil
 
     # Register your models here.
     admin.site.register(MyCustomEmailUser, MyCustomEmailUserAdmin)
+
+
+Supported versions
+------------------
+
+Django:
+- 3.2 LTS
+- 4.0
+
+Python:
+- 3.7
+- 3.8
+- 3.9
+- 3.10
 
 
 Changelog
