@@ -1,0 +1,57 @@
+[tool.poetry]
+name = "django-custom-user"
+version = "0.7"
+description = "Custom user model for Django with the same behaviour as the default User class but with email instead of username."
+authors = ["Josep Cugat <jcugat@gmail.com>"]
+license = "BSD-3-Clause"
+readme = "README.rst"
+homepage = "https://github.com/jcugat/django-custom-user"
+repository = "https://github.com/jcugat/django-custom-user"
+documentation = "https://github.com/jcugat/django-custom-user#django-custom-user"
+keywords = ["django", "custom", "user", "auth", "model", "email", "without", "username"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Web Environment",
+    "Framework :: Django",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: BSD License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Topic :: Internet :: WWW/HTTP",
+    "Topic :: Internet :: WWW/HTTP :: Dynamic Content",
+]
+packages = [
+    { include = "custom_user", from = "src" },
+]
+
+[tool.poetry.dependencies]
+python = ">=3.7"
+Django = ">=3.2"
+
+[tool.poetry.dev-dependencies]
+coverage = {version = "^6.3.0", extras = ["toml"]}
+django-environ = {version = "^0.8.0", python = "^3.7"}
+mysqlclient = {version = "^2.1.0", optional = true, extras = ["mysql"]}
+psycopg2 = {version = "^2.9.0", optional = true, extras = ["postgres"]}
+tox = "^3.24.0"
+tox-gh-actions = "^2.9.0"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.coverage.run]
+branch = true
+parallel = true
+source = "custom_user"
+
+[tool.coverage.paths]
+source = [
+    "src/custom_user",
+    ".tox/*/lib/python*/site-packages/custom_user",
+]
