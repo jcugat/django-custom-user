@@ -2,16 +2,13 @@
 import os
 import re
 from io import StringIO
-from unittest import skipIf, skipUnless
 from unittest.mock import patch
 
-import django
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.middleware import AuthenticationMiddleware
 from django.core import mail
 from django.core import management
-from django.db import connection
 from django.forms.fields import Field
 from django.http import HttpRequest, HttpResponse
 from django.test import TestCase
@@ -168,28 +165,6 @@ class MigrationsTest(TestCase):
         with patch('sys.stdout', new_callable=StringIO) as mock:
             management.call_command('makemigrations', 'custom_user', dry_run=True)
         self.assertEqual(mock.getvalue(), 'No changes detected in app \'custom_user\'\n')
-
-    @skipUnless(django.VERSION[:2] == (1, 7), 'Monkey patch only applied to Django 1.7')
-    def test_monkey_patch_model_field(self):
-        field_last_login = get_user_model()._meta.get_field('last_login')
-        self.assertTrue(field_last_login.null)
-        self.assertTrue(field_last_login.blank)
-
-    @skipUnless(django.VERSION[:2] == (1, 7), 'Monkey patch only applied to Django 1.7')
-    def test_monkey_patch_db_column(self):
-        table_name = get_user_model()._meta.db_table
-        cursor = connection.cursor()
-        table_fields = connection.introspection.get_table_description(cursor, table_name)
-        field = next(field for field in table_fields if field.name == 'last_login')  # pragma: no cover
-        self.assertTrue(field.null_ok)
-
-    @skipUnless(django.VERSION[:2] == (1, 7), 'Monkey patch only applied to Django 1.7')
-    def test_monkey_patch_side_effects(self):
-        # Check the parent model isn't affected from the monkey patch
-        from django.contrib.auth.models import AbstractBaseUser
-        field_last_login = AbstractBaseUser._meta.get_field('last_login')
-        self.assertFalse(field_last_login.null)
-        self.assertFalse(field_last_login.blank)
 
 
 class TestAuthenticationMiddleware(TestCase):
@@ -423,19 +398,13 @@ class EmailUserAdminTest(TestCase):
             self.model_name = "emailuser"
             self.model_verbose_name = "user"
             self.model_verbose_name_plural = "Users"
-            if django.VERSION[:2] < (1, 7):
-                self.app_verbose_name = "Custom_User"
-            else:
-                self.app_verbose_name = "Custom User"
+            self.app_verbose_name = "Custom User"
         if settings.AUTH_USER_MODEL == "test_custom_user_subclass.MyCustomEmailUser":
             self.app_name = "test_custom_user_subclass"
             self.model_name = "mycustomemailuser"
             self.model_verbose_name = "MyCustomEmailUserVerboseName"
             self.model_verbose_name_plural = "MyCustomEmailUserVerboseNamePlural"
-            if django.VERSION[:2] < (1, 7):
-                self.app_verbose_name = "Test_Custom_User_Subclass"
-            else:
-                self.app_verbose_name = "Test Custom User Subclass"
+            self.app_verbose_name = "Test Custom User Subclass"
 
     def test_url(self):
         self.assertTrue(self.client.login(
@@ -479,12 +448,7 @@ class EmailUserAdminTest(TestCase):
         ))
 
         user_change_url = reverse('admin:%s_%s_change' % (self.app_name, self.model_name), args=(self.user.pk,))
-
-        if django.VERSION[:2] < (1, 8):
-            # Since reverse() does not exist yet, create path manually
-            password_change_url = user_change_url + 'password/'
-        else:
-            password_change_url = reverse('admin:auth_user_password_change', args=(self.user.pk,))
+        password_change_url = reverse('admin:auth_user_password_change', args=(self.user.pk,))
 
         response = self.client.get(user_change_url)
         # Test the link inside password field help_text.
