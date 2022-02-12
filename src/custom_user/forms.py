@@ -102,7 +102,7 @@ class EmailUserChangeForm(forms.ModelForm):
         "Raw passwords are not stored, so there is no way to see "
         "this user's password, but you can change the password "
         "using <a href=\"%(url)s\">this form</a>."
-    ) % {'url': 'password/' if django.VERSION < (1, 9) else '../password/'})
+    ) % {'url': '../password/'})
 
     class Meta:  # noqa: D101
         model = get_user_model()

@@ -1,6 +1,7 @@
 """EmailUser tests."""
 import os
 import re
+from io import StringIO
 from unittest import skipIf, skipUnless
 from unittest.mock import patch
 
@@ -12,7 +13,7 @@ from django.core import mail
 from django.core import management
 from django.db import connection
 from django.forms.fields import Field
-from django.http import HttpRequest
+from django.http import HttpRequest, HttpResponse
 from django.test import TestCase
 from django.test.utils import override_settings
 from django.urls import reverse
@@ -21,12 +22,6 @@ from django.utils.encoding import force_str
 from django.utils.translation import gettext as _
 
 from .forms import EmailUserChangeForm, EmailUserCreationForm
-
-try:
-    from django.contrib.auth.middleware import SessionAuthenticationMiddleware
-except ImportError:
-    # Only available from Django 1.7, ignore the tests otherwise
-    SessionAuthenticationMiddleware = None
 
 
 class UserTest(TestCase):
@@ -167,15 +162,9 @@ class UserManagerTest(TestCase):
         )
 
 
-@skipIf(django.VERSION < (1, 7, 0), 'Migrations not available in this Django version')
 class MigrationsTest(TestCase):
 
     def test_makemigrations_no_changes(self):
-        try:
-            from StringIO import StringIO
-        except ImportError:
-            from io import StringIO
-
         with patch('sys.stdout', new_callable=StringIO) as mock:
             management.call_command('makemigrations', 'custom_user', dry_run=True)
         self.assertEqual(mock.getvalue(), 'No changes detected in app \'custom_user\'\n')
@@ -203,8 +192,7 @@ class MigrationsTest(TestCase):
         self.assertFalse(field_last_login.blank)
 
 
-@skipIf(SessionAuthenticationMiddleware is None, "SessionAuthenticationMiddleware not available in this version")
-class TestSessionAuthenticationMiddleware(TestCase):
+class TestAuthenticationMiddleware(TestCase):
 
     def setUp(self):
         self.user_email = 'test@example.com'
@@ -213,8 +201,7 @@ class TestSessionAuthenticationMiddleware(TestCase):
             self.user_email,
             self.user_password)
 
-        self.middleware_auth = AuthenticationMiddleware()
-        self.middleware_session_auth = SessionAuthenticationMiddleware()
+        self.middleware_auth = AuthenticationMiddleware(lambda req: HttpResponse())
         self.assertTrue(self.client.login(
             username=self.user_email,
             password=self.user_password,
@@ -226,30 +213,26 @@ class TestSessionAuthenticationMiddleware(TestCase):
         # Changing a user's password shouldn't invalidate the session if session
         # verification isn't activated.
         session_key = self.request.session.session_key
-        self.middleware_auth.process_request(self.request)
-        self.middleware_session_auth.process_request(self.request)
+        self.middleware_auth(self.request)
         self.assertIsNotNone(self.request.user)
-        self.assertFalse(self.request.user.is_anonymous())
+        self.assertFalse(self.request.user.is_anonymous)
 
         # After password change, user should remain logged in.
         self.user.set_password('new_password')
         self.user.save()
-        self.middleware_auth.process_request(self.request)
-        self.middleware_session_auth.process_request(self.request)
+        self.middleware_auth(self.request)
         self.assertIsNotNone(self.request.user)
-        self.assertFalse(self.request.user.is_anonymous())
+        self.assertFalse(self.request.user.is_anonymous)
         self.assertEqual(session_key, self.request.session.session_key)
 
     def test_changed_password_invalidates_session_with_middleware(self):
         session_key = self.request.session.session_key
-        with self.modify_settings(MIDDLEWARE_CLASSES={'append': ['django.contrib.auth.middleware.SessionAuthenticationMiddleware']}):
-            # After password change, user should be anonymous
-            self.user.set_password('new_password')
-            self.user.save()
-            self.middleware_auth.process_request(self.request)
-            self.middleware_session_auth.process_request(self.request)
-            self.assertIsNotNone(self.request.user)
-            self.assertTrue(self.request.user.is_anonymous())
+        # After password change, user should be anonymous
+        self.user.set_password('new_password')
+        self.user.save()
+        self.middleware_auth(self.request)
+        self.assertIsNotNone(self.request.user)
+        self.assertTrue(self.request.user.is_anonymous)
         # session should be flushed
         self.assertNotEqual(session_key, self.request.session.session_key)
 
