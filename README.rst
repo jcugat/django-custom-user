@@ -2,16 +2,15 @@ Django Custom User
 ==================
 
 .. image:: https://img.shields.io/pypi/v/django-custom-user.svg
-    :target: https://pypi.python.org/pypi/django-custom-user
+   :target: https://pypi.org/project/django-custom-user/
+   :alt: PyPI version
 
-.. image:: https://img.shields.io/travis/jcugat/django-custom-user/master.svg
-    :target: https://travis-ci.org/jcugat/django-custom-user
-
-.. image:: https://img.shields.io/codecov/c/github/jcugat/django-custom-user/master.svg
-    :target: https://codecov.io/gh/jcugat/django-custom-user
+.. image:: https://github.com/jcugat/django-custom-user/actions/workflows/ci.yml/badge.svg
+   :target: https://github.com/jcugat/django-custom-user/actions/workflows/ci.yml
+   :alt: GitHub Actions Workflow Status (main branch)
 
 .. image:: https://img.shields.io/pypi/dm/django-custom-user.svg
-    :target: https://pypi.python.org/pypi/django-custom-user
+   :target: https://pypi.python.org/pypi/django-custom-user
 
 
 Custom user model for Django >= 1.5 with the same behaviour as Django's default User but without a username field. Uses email as the USERNAME_FIELD for authentication.
