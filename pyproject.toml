@@ -71,13 +71,22 @@ exclude = '''
 [tool.coverage.run]
 branch = true
 parallel = true
-source = ["custom_user"]
+source = [
+    "custom_user",
+    "test_custom_user_subclass",
+    "test_settings",
+]
 
 [tool.coverage.paths]
 source = [
     "src/custom_user",
     ".tox/*/lib/python*/site-packages/custom_user",
 ]
+
+[tool.coverage.report]
+fail_under = 100
+show_missing = true
+skip_covered = true
 
 [tool.isort]
 profile = "black"

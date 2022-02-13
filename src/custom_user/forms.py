@@ -121,7 +121,7 @@ class EmailUserChangeForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         password = self.fields.get("password")
-        if password:
+        if password:  # pragma: no cover
             password.help_text = password.help_text.format("../password/")
         user_permissions = self.fields.get("user_permissions")
         if user_permissions:

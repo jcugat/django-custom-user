@@ -291,7 +291,7 @@ class EmailUserCreationFormTest(TestDataMixin, TestCase):
         }
         form = EmailUserCreationForm(data)
         self.assertFalse(form.is_valid())
-        validator = next(
+        validator = next(  # pragma: no cover
             v
             for v in get_user_model()._meta.get_field("email").validators
             if v.code == "invalid"
@@ -429,7 +429,7 @@ class EmailUserChangeFormTest(TestDataMixin, TestCase):
         data = {"email": "not valid"}
         form = EmailUserChangeForm(data, instance=user)
         self.assertFalse(form.is_valid())
-        validator = next(
+        validator = next(  # pragma: no cover
             v
             for v in get_user_model()._meta.get_field("email").validators
             if v.code == "invalid"
