@@ -2,7 +2,7 @@
 import os
 import re
 from io import StringIO
-from unittest.mock import patch
+from unittest import mock
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -14,7 +14,6 @@ from django.test import TestCase
 from django.test.utils import override_settings
 from django.urls import reverse
 from django.utils import timezone
-from django.utils.encoding import force_str
 from django.utils.translation import gettext as _
 
 from .forms import EmailUserChangeForm, EmailUserCreationForm
@@ -26,7 +25,10 @@ class UserTest(TestCase):
     user_password = "1234"
 
     def create_user(self):
-        """Create and return a new user with self.user_email as login and self.user_password as password."""
+        """
+        Create and return a new user with self.user_email as login and
+        self.user_password as password.
+        """
         return get_user_model().objects.create_user(self.user_email, self.user_password)
 
     def test_user_creation(self):
@@ -34,7 +36,7 @@ class UserTest(TestCase):
         right_now = timezone.now().replace(
             microsecond=0
         )  # MySQL doesn't store microseconds
-        with patch.object(timezone, "now", return_value=right_now):
+        with mock.patch.object(timezone, "now", return_value=right_now):
             self.create_user()
 
         # Check user exists and email is correct
@@ -116,6 +118,15 @@ class UserManagerTest(TestCase):
         self.assertFalse(user.is_staff)
         self.assertFalse(user.is_superuser)
 
+    def test_create_user_is_staff(self):
+        email_lowercase = "normal@normal.com"
+        user = get_user_model().objects.create_user(email_lowercase, is_staff=True)
+        self.assertEqual(user.email, email_lowercase)
+        self.assertFalse(user.has_usable_password())
+        self.assertTrue(user.is_active)
+        self.assertTrue(user.is_staff)
+        self.assertFalse(user.is_superuser)
+
     def test_create_superuser(self):
         email_lowercase = "normal@normal.com"
         password = "password1234$%&/"
@@ -125,6 +136,22 @@ class UserManagerTest(TestCase):
         self.assertTrue(user.is_active)
         self.assertTrue(user.is_staff)
         self.assertTrue(user.is_superuser)
+
+    def test_create_super_user_raises_error_on_false_is_superuser(self):
+        with self.assertRaisesMessage(
+            ValueError, "Superuser must have is_superuser=True."
+        ):
+            get_user_model().objects.create_superuser(
+                email="test@test.com",
+                is_superuser=False,
+            )
+
+    def test_create_superuser_raises_error_on_false_is_staff(self):
+        with self.assertRaisesMessage(ValueError, "Superuser must have is_staff=True."):
+            get_user_model().objects.create_superuser(
+                email="test@test.com",
+                is_staff=False,
+            )
 
     def test_user_creation_is_active(self):
         # Create deactivated user
@@ -145,7 +172,7 @@ class UserManagerTest(TestCase):
         self.assertTrue(user.is_staff)
 
     def test_create_user_email_domain_normalize_rfc3696(self):
-        # According to http://tools.ietf.org/html/rfc3696#section-3
+        # According to https://tools.ietf.org/html/rfc3696#section-3
         # the "@" symbol can be part of the local part of an email address
         returned = get_user_model().objects.normalize_email(r"Abc\@DEF@EXAMPLE.com")
         self.assertEqual(returned, r"Abc\@DEF@example.com")
@@ -156,9 +183,9 @@ class UserManagerTest(TestCase):
 
     def test_create_user_email_domain_normalize_with_whitespace(self):
         returned = get_user_model().objects.normalize_email(
-            "email\ with_whitespace@D.COM"
+            r"email\ with_whitespace@D.COM"
         )
-        self.assertEqual(returned, "email\ with_whitespace@d.com")
+        self.assertEqual(returned, r"email\ with_whitespace@d.com")
 
     def test_empty_username(self):
         self.assertRaisesMessage(
@@ -171,26 +198,25 @@ class UserManagerTest(TestCase):
 
 class MigrationsTest(TestCase):
     def test_makemigrations_no_changes(self):
-        with patch("sys.stdout", new_callable=StringIO) as mock:
+        with mock.patch("sys.stdout", new_callable=StringIO) as mocked:
             management.call_command("makemigrations", "custom_user", dry_run=True)
-        self.assertEqual(mock.getvalue(), "No changes detected in app 'custom_user'\n")
+        self.assertEqual(
+            mocked.getvalue(), "No changes detected in app 'custom_user'\n"
+        )
 
 
 class TestAuthenticationMiddleware(TestCase):
-    def setUp(self):
-        self.user_email = "test@example.com"
-        self.user_password = "test_password"
-        self.user = get_user_model().objects.create_user(
-            self.user_email, self.user_password
+    @classmethod
+    def setUpTestData(cls):
+        cls.user_email = "test@example.com"
+        cls.user_password = "test_password"
+        cls.user = get_user_model().objects.create_user(
+            cls.user_email, cls.user_password
         )
 
-        self.middleware_auth = AuthenticationMiddleware(lambda req: HttpResponse())
-        self.assertTrue(
-            self.client.login(
-                username=self.user_email,
-                password=self.user_password,
-            )
-        )
+    def setUp(self):
+        self.middleware = AuthenticationMiddleware(lambda req: HttpResponse())
+        self.client.force_login(self.user)
         self.request = HttpRequest()
         self.request.session = self.client.session
 
@@ -198,145 +224,217 @@ class TestAuthenticationMiddleware(TestCase):
         # Changing a user's password shouldn't invalidate the session if session
         # verification isn't activated.
         session_key = self.request.session.session_key
-        self.middleware_auth(self.request)
+        self.middleware(self.request)
         self.assertIsNotNone(self.request.user)
         self.assertFalse(self.request.user.is_anonymous)
 
         # After password change, user should remain logged in.
         self.user.set_password("new_password")
         self.user.save()
-        self.middleware_auth(self.request)
+        self.middleware(self.request)
         self.assertIsNotNone(self.request.user)
         self.assertFalse(self.request.user.is_anonymous)
         self.assertEqual(session_key, self.request.session.session_key)
 
-    def test_changed_password_invalidates_session_with_middleware(self):
-        session_key = self.request.session.session_key
+    def test_no_password_change_doesnt_invalidate_session(self):
+        self.request.session = self.client.session
+        self.middleware(self.request)
+        self.assertIsNotNone(self.request.user)
+        self.assertFalse(self.request.user.is_anonymous)
+
+    def test_changed_password_invalidates_session(self):
         # After password change, user should be anonymous
         self.user.set_password("new_password")
         self.user.save()
-        self.middleware_auth(self.request)
+        self.middleware(self.request)
         self.assertIsNotNone(self.request.user)
         self.assertTrue(self.request.user.is_anonymous)
         # session should be flushed
-        self.assertNotEqual(session_key, self.request.session.session_key)
+        self.assertIsNone(self.request.session.session_key)
 
 
-@override_settings(
-    USE_TZ=False, PASSWORD_HASHERS=("django.contrib.auth.hashers.SHA1PasswordHasher",)
-)
-class EmailUserCreationFormTest(TestCase):
-    def setUp(self):
-        get_user_model().objects.create_user("testclient@example.com", "test123")
+class TestDataMixin:
+    @classmethod
+    def setUpTestData(cls):
+        cls.email = "testclient@example.com"
+        cls.password = "test123"
+        get_user_model().objects.create_user(cls.email, cls.password)
 
+        get_user_model().objects.create(email="empty_password@example.com", password="")
+        get_user_model().objects.create(
+            email="unmanageable_password@example.com", password="$"
+        )
+        get_user_model().objects.create(
+            email="unknown_password@example.com", password="foo$bar"
+        )
+
+
+class EmailUserCreationFormTest(TestDataMixin, TestCase):
     def test_user_already_exists(self):
         data = {
-            "email": "testclient@example.com",
-            "password1": "test123",
-            "password2": "test123",
+            "email": self.email,
+            "password1": self.password,
+            "password2": self.password,
         }
         form = EmailUserCreationForm(data)
         self.assertFalse(form.is_valid())
         self.assertEqual(
-            form["email"].errors, [force_str(form.error_messages["duplicate_email"])]
+            form["email"].errors,
+            [str(form.error_messages["duplicate_email"])],
         )
 
     def test_invalid_data(self):
         data = {
             "email": "testclient",
-            "password1": "test123",
-            "password2": "test123",
+            "password1": self.password,
+            "password2": self.password,
         }
         form = EmailUserCreationForm(data)
         self.assertFalse(form.is_valid())
-        self.assertEqual(form["email"].errors, [_("Enter a valid email address.")])
+        validator = next(
+            v
+            for v in get_user_model()._meta.get_field("email").validators
+            if v.code == "invalid"
+        )
+        self.assertEqual(form["email"].errors, [str(validator.message)])
 
     def test_password_verification(self):
         # The verification password is incorrect.
         data = {
-            "email": "testclient@example.com",
+            "email": self.email,
             "password1": "test123",
             "password2": "test",
         }
         form = EmailUserCreationForm(data)
         self.assertFalse(form.is_valid())
         self.assertEqual(
-            form["password2"].errors,
-            [force_str(form.error_messages["password_mismatch"])],
+            form["password2"].errors, [str(form.error_messages["password_mismatch"])]
         )
 
     def test_both_passwords(self):
         # One (or both) passwords weren't given
-        data = {"email": "testclient@example.com"}
+        data = {"email": self.email}
         form = EmailUserCreationForm(data)
-        required_error = [force_str(Field.default_error_messages["required"])]
+        required_error = [str(Field.default_error_messages["required"])]
         self.assertFalse(form.is_valid())
         self.assertEqual(form["password1"].errors, required_error)
         self.assertEqual(form["password2"].errors, required_error)
 
-        data["password2"] = "test123"
+        data["password2"] = self.password
         form = EmailUserCreationForm(data)
         self.assertFalse(form.is_valid())
         self.assertEqual(form["password1"].errors, required_error)
         self.assertEqual(form["password2"].errors, [])
 
-    def test_success(self):
+    @mock.patch("django.contrib.auth.password_validation.password_changed")
+    def test_success(self, password_changed):
         # The success case.
         data = {
             "email": "jsmith@example.com",
-            "password1": "test123",
-            "password2": "test123",
+            "password1": self.password,
+            "password2": self.password,
         }
         form = EmailUserCreationForm(data)
         self.assertTrue(form.is_valid())
+        form.save(commit=False)
+        self.assertEqual(password_changed.call_count, 0)
         u = form.save()
+        self.assertEqual(password_changed.call_count, 1)
         self.assertEqual(
-            repr(u), "<%s: jsmith@example.com>" % get_user_model().__name__
+            repr(u), "<{}: jsmith@example.com>".format(get_user_model().__name__)
         )
-        self.assertIsNotNone(u.pk)
 
-    def test_success_without_commit(self):
-        # The success case, but without saving the user instance to the db.
+    @override_settings(
+        AUTH_PASSWORD_VALIDATORS=[
+            {
+                "NAME": (
+                    "django.contrib.auth.password_validation."
+                    "UserAttributeSimilarityValidator"
+                )
+            },
+            {
+                "NAME": (
+                    "django.contrib.auth.password_validation.MinimumLengthValidator"
+                ),
+                "OPTIONS": {
+                    "min_length": 12,
+                },
+            },
+        ]
+    )
+    def test_validates_password(self):
         data = {
             "email": "jsmith@example.com",
-            "password1": "test123",
-            "password2": "test123",
+            "password1": "jsmith",
+            "password2": "jsmith",
+        }
+        form = EmailUserCreationForm(data)
+        self.assertFalse(form.is_valid())
+        self.assertEqual(len(form["password2"].errors), 2)
+        self.assertIn(
+            "The password is too similar to the email address.",
+            form["password2"].errors,
+        )
+        self.assertIn(
+            "This password is too short. It must contain at least 12 characters.",
+            form["password2"].errors,
+        )
+
+    def test_password_whitespace_not_stripped(self):
+        data = {
+            "email": "jsmith@example.com",
+            "password1": "   testpassword   ",
+            "password2": "   testpassword   ",
         }
         form = EmailUserCreationForm(data)
         self.assertTrue(form.is_valid())
-        u = form.save(commit=False)
+        self.assertEqual(form.cleaned_data["password1"], data["password1"])
+        self.assertEqual(form.cleaned_data["password2"], data["password2"])
+
+    @override_settings(
+        AUTH_PASSWORD_VALIDATORS=[
+            {
+                "NAME": (
+                    "django.contrib.auth.password_validation."
+                    "UserAttributeSimilarityValidator"
+                )
+            },
+        ]
+    )
+    def test_password_help_text(self):
+        form = EmailUserCreationForm()
         self.assertEqual(
-            repr(u), "<%s: jsmith@example.com>" % get_user_model().__name__
+            form.fields["password1"].help_text,
+            "<ul><li>"
+            "Your password can’t be too similar to your other personal information."
+            "</li></ul>",
         )
-        self.assertIsNone(u.pk, None)
+
+    def test_html_autocomplete_attributes(self):
+        form = EmailUserCreationForm()
+        tests = (
+            ("password1", "new-password"),
+            ("password2", "new-password"),
+        )
+        for field_name, autocomplete in tests:
+            with self.subTest(field_name=field_name, autocomplete=autocomplete):
+                self.assertEqual(
+                    form.fields[field_name].widget.attrs["autocomplete"], autocomplete
+                )
 
 
-@override_settings(
-    USE_TZ=False, PASSWORD_HASHERS=("django.contrib.auth.hashers.SHA1PasswordHasher",)
-)
-class EmailUserChangeFormTest(TestCase):
-    def setUp(self):
-        user = get_user_model().objects.create_user("testclient@example.com")
-        user.password = "sha1$6efc0$f93efe9fd7542f25a7be94871ea45aa95de57161"
-        user.save()
-        get_user_model().objects.create_user("empty_password@example.com")
-        user_unmanageable = get_user_model().objects.create_user(
-            "unmanageable_password@example.com"
-        )
-        user_unmanageable.password = "$"
-        user_unmanageable.save()
-        user_unknown = get_user_model().objects.create_user(
-            "unknown_password@example.com"
-        )
-        user_unknown.password = "foo$bar"
-        user_unknown.save()
-
+class EmailUserChangeFormTest(TestDataMixin, TestCase):
     def test_username_validity(self):
-        user = get_user_model().objects.get(email="testclient@example.com")
+        user = get_user_model().objects.get(email=self.email)
         data = {"email": "not valid"}
         form = EmailUserChangeForm(data, instance=user)
         self.assertFalse(form.is_valid())
-        self.assertEqual(form["email"].errors, [_("Enter a valid email address.")])
+        validator = next(
+            v
+            for v in get_user_model()._meta.get_field("email").validators
+            if v.code == "invalid"
+        )
+        self.assertEqual(form["email"].errors, [str(validator.message)])
 
     def test_bug_14242(self):
         # A regression test, introduce by adding an optimization for the
@@ -344,7 +442,7 @@ class EmailUserChangeFormTest(TestCase):
 
         class MyUserForm(EmailUserChangeForm):
             def __init__(self, *args, **kwargs):
-                super(MyUserForm, self).__init__(*args, **kwargs)
+                super().__init__(*args, **kwargs)
                 self.fields[
                     "groups"
                 ].help_text = "These groups give users different permissions"
@@ -355,7 +453,7 @@ class EmailUserChangeFormTest(TestCase):
         # Just check we can create it
         MyUserForm({})
 
-    def test_unsuable_password(self):
+    def test_unusable_password(self):
         user = get_user_model().objects.get(email="empty_password@example.com")
         user.set_unusable_password()
         user.save()
@@ -382,9 +480,9 @@ class EmailUserChangeFormTest(TestCase):
         )
 
     def test_bug_19133(self):
-        """The change form does not return the password value."""
+        "The change form does not return the password value"
         # Use the form to construct the POST data
-        user = get_user_model().objects.get(email="testclient@example.com")
+        user = get_user_model().objects.get(email=self.email)
         form_for_data = EmailUserChangeForm(instance=user)
         post_data = form_for_data.initial
 
@@ -396,13 +494,11 @@ class EmailUserChangeFormTest(TestCase):
         form = EmailUserChangeForm(instance=user, data=post_data)
 
         self.assertTrue(form.is_valid())
-        self.assertEqual(
-            form.cleaned_data["password"],
-            "sha1$6efc0$f93efe9fd7542f25a7be94871ea45aa95de57161",
-        )
+        # original hashed password contains $
+        self.assertIn("$", form.cleaned_data["password"])
 
     def test_bug_19349_bound_password_field(self):
-        user = get_user_model().objects.get(email="testclient@example.com")
+        user = get_user_model().objects.get(email=self.email)
         form = EmailUserChangeForm(data={}, instance=user)
         # When rendering the bound password field,
         # ReadOnlyPasswordHashWidget needs the initial
@@ -464,7 +560,7 @@ class EmailUserAdminTest(TestCase):
             reverse("admin:%s_%s_changelist" % (self.app_name, self.model_name))
         )
         self.assertEqual(
-            force_str(response.context["title"]),
+            str(response.context["title"]),
             "Select %s to change" % self.model_verbose_name,
         )
 
@@ -478,7 +574,7 @@ class EmailUserAdminTest(TestCase):
 
         response = self.client.get(reverse("admin:app_list", args=(self.app_name,)))
         self.assertEqual(
-            force_str(response.context["app_list"][0]["models"][0]["name"]),
+            str(response.context["app_list"][0]["models"][0]["name"]),
             self.model_verbose_name_plural,
         )
 
@@ -502,7 +598,7 @@ class EmailUserAdminTest(TestCase):
         # Test the link inside password field help_text.
         rel_link = re.search(
             r'you can change the password using <a href="([^"]*)">this form</a>',
-            force_str(response.content),
+            str(response.content),
         ).groups()[0]
         self.assertEqual(
             os.path.normpath(user_change_url + rel_link),

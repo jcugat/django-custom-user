@@ -11,8 +11,9 @@ from django.utils.translation import gettext_lazy as _
 
 
 class EmailUserManager(BaseUserManager):
-
-    """Custom manager for EmailUser."""
+    """
+    Custom manager for EmailUser.
+    """
 
     def _create_user(self, email, password, is_staff, is_superuser, **extra_fields):
         """
@@ -24,7 +25,6 @@ class EmailUserManager(BaseUserManager):
         :param bool is_superuser: whether user admin or not
         :return custom_user.models.EmailUser user: user
         :raise ValueError: email is not set
-
         """
         now = timezone.now()
         if not email:
@@ -51,25 +51,31 @@ class EmailUserManager(BaseUserManager):
         :param str email: user email
         :param str password: user password
         :return custom_user.models.EmailUser user: regular user
-
         """
-        is_staff = extra_fields.pop("is_staff", False)
-        return self._create_user(email, password, is_staff, False, **extra_fields)
+        extra_fields.setdefault("is_staff", False)
+        extra_fields.setdefault("is_superuser", False)
+        return self._create_user(email, password, **extra_fields)
 
-    def create_superuser(self, email, password, **extra_fields):
+    def create_superuser(self, email, password=None, **extra_fields):
         """
         Create and save an EmailUser with the given email and password.
 
         :param str email: user email
         :param str password: user password
         :return custom_user.models.EmailUser user: admin user
-
         """
-        return self._create_user(email, password, True, True, **extra_fields)
+        extra_fields.setdefault("is_staff", True)
+        extra_fields.setdefault("is_superuser", True)
+
+        if extra_fields.get("is_staff") is not True:
+            raise ValueError("Superuser must have is_staff=True.")
+        if extra_fields.get("is_superuser") is not True:
+            raise ValueError("Superuser must have is_superuser=True.")
+
+        return self._create_user(email, password, **extra_fields)
 
 
 class AbstractEmailUser(AbstractBaseUser, PermissionsMixin):
-
     """
     Abstract User with the same behaviour as Django's default User.
 
@@ -84,7 +90,6 @@ class AbstractEmailUser(AbstractBaseUser, PermissionsMixin):
         * password
         * last_login
         * is_superuser
-
     """
 
     email = models.EmailField(
@@ -110,7 +115,7 @@ class AbstractEmailUser(AbstractBaseUser, PermissionsMixin):
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
 
-    class Meta:  # noqa: D101
+    class Meta:
         verbose_name = _("user")
         verbose_name_plural = _("users")
         abstract = True
@@ -129,13 +134,11 @@ class AbstractEmailUser(AbstractBaseUser, PermissionsMixin):
 
 
 class EmailUser(AbstractEmailUser):
-
     """
     Concrete class of AbstractEmailUser.
 
     Use this if you don't need to extend EmailUser.
-
     """
 
-    class Meta(AbstractEmailUser.Meta):  # noqa: D101
+    class Meta(AbstractEmailUser.Meta):
         swappable = "AUTH_USER_MODEL"
