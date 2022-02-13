@@ -18,12 +18,16 @@ classifiers = [
     "Operating System :: OS Independent",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
     "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Topic :: Internet :: WWW/HTTP",
     "Topic :: Internet :: WWW/HTTP :: Dynamic Content",
+    "Topic :: Internet :: WWW/HTTP :: WSGI",
+    "Topic :: Software Development :: Libraries :: Application Frameworks",
+    "Topic :: Software Development :: Libraries :: Python Modules",
 ]
 packages = [
     { include = "custom_user", from = "src" },
@@ -36,8 +40,12 @@ mysqlclient = {version = "^2.1.0", optional = true}
 psycopg2 = {version = "^2.9.0", optional = true}
 
 [tool.poetry.dev-dependencies]
+autoflake = "^1.4"
+black = "^22.1.0"
 coverage = {version = "^6.3.0", extras = ["toml"]}
 django-environ = "^0.8.0"
+flake8 = "^4.0.1"
+isort = "^5.10.0"
 tox = "^3.24.0"
 tox-gh-actions = "^2.9.0"
 tox-poetry-installer = {extras = ["poetry"], version = "^0.8.3"}
@@ -50,6 +58,15 @@ postgres = ["psycopg2"]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
 
+[tool.black]
+exclude = '''
+/(
+    .tox
+  | src/custom_user/migrations/
+  | test_custom_user_subclass/migrations/
+)/
+'''
+
 [tool.coverage.run]
 branch = true
 parallel = true
@@ -60,3 +77,6 @@ source = [
     "src/custom_user",
     ".tox/*/lib/python*/site-packages/custom_user",
 ]
+
+[tool.isort]
+profile = "black"
