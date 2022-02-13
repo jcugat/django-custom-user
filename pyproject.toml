@@ -30,16 +30,17 @@ packages = [
 ]
 
 [tool.poetry.dependencies]
-python = ">=3.7"
+python = "^3.7"
 Django = ">=3.2"
 mysqlclient = {version = "^2.1.0", optional = true}
 psycopg2 = {version = "^2.9.0", optional = true}
 
 [tool.poetry.dev-dependencies]
 coverage = {version = "^6.3.0", extras = ["toml"]}
-django-environ = {version = "^0.8.0", python = "^3.7"}
+django-environ = "^0.8.0"
 tox = "^3.24.0"
 tox-gh-actions = "^2.9.0"
+tox-poetry-installer = {extras = ["poetry"], version = "^0.8.3"}
 
 [tool.poetry.extras]
 mysql = ["mysqlclient"]
