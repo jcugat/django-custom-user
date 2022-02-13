@@ -7,8 +7,7 @@ from unittest.mock import patch
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.middleware import AuthenticationMiddleware
-from django.core import mail
-from django.core import management
+from django.core import mail, management
 from django.forms.fields import Field
 from django.http import HttpRequest, HttpResponse
 from django.test import TestCase
@@ -23,8 +22,8 @@ from .forms import EmailUserChangeForm, EmailUserCreationForm
 
 class UserTest(TestCase):
 
-    user_email = 'newuser@localhost.local'
-    user_password = '1234'
+    user_email = "newuser@localhost.local"
+    user_password = "1234"
 
     def create_user(self):
         """Create and return a new user with self.user_email as login and self.user_password as password."""
@@ -32,8 +31,10 @@ class UserTest(TestCase):
 
     def test_user_creation(self):
         # Create a new user saving the time frame
-        right_now = timezone.now().replace(microsecond=0)  # MySQL doesn't store microseconds
-        with patch.object(timezone, 'now', return_value=right_now):
+        right_now = timezone.now().replace(
+            microsecond=0
+        )  # MySQL doesn't store microseconds
+        with patch.object(timezone, "now", return_value=right_now):
             self.create_user()
 
         # Check user exists and email is correct
@@ -61,7 +62,7 @@ class UserTest(TestCase):
         # Email definition
         subject = "Email Subject"
         message = "Email Message"
-        from_email = 'from@normal.com'
+        from_email = "from@normal.com"
 
         user = self.create_user()
 
@@ -88,10 +89,13 @@ class UserTest(TestCase):
             "auth_password": None,
             "connection": None,
         }
-        user = get_user_model()(email='foo@bar.com')
+        user = get_user_model()(email="foo@bar.com")
         user.email_user(
             subject="Subject here",
-            message="This is a message", from_email="from@domain.com", **kwargs)
+            message="This is a message",
+            from_email="from@domain.com",
+            **kwargs
+        )
         # Test that one message has been sent.
         self.assertEqual(len(mail.outbox), 1)
         # Verify that test email contains the correct attributes:
@@ -103,9 +107,8 @@ class UserTest(TestCase):
 
 
 class UserManagerTest(TestCase):
-
     def test_create_user(self):
-        email_lowercase = 'normal@normal.com'
+        email_lowercase = "normal@normal.com"
         user = get_user_model().objects.create_user(email_lowercase)
         self.assertEqual(user.email, email_lowercase)
         self.assertFalse(user.has_usable_password())
@@ -114,8 +117,8 @@ class UserManagerTest(TestCase):
         self.assertFalse(user.is_superuser)
 
     def test_create_superuser(self):
-        email_lowercase = 'normal@normal.com'
-        password = 'password1234$%&/'
+        email_lowercase = "normal@normal.com"
+        password = "password1234$%&/"
         user = get_user_model().objects.create_superuser(email_lowercase, password)
         self.assertEqual(user.email, email_lowercase)
         self.assertTrue(user.check_password, password)
@@ -125,62 +128,69 @@ class UserManagerTest(TestCase):
 
     def test_user_creation_is_active(self):
         # Create deactivated user
-        email_lowercase = 'normal@normal.com'
-        password = 'password1234$%&/'
-        user = get_user_model().objects.create_user(email_lowercase, password, is_active=False)
+        email_lowercase = "normal@normal.com"
+        password = "password1234$%&/"
+        user = get_user_model().objects.create_user(
+            email_lowercase, password, is_active=False
+        )
         self.assertFalse(user.is_active)
 
     def test_user_creation_is_staff(self):
         # Create staff user
-        email_lowercase = 'normal@normal.com'
-        password = 'password1234$%&/'
-        user = get_user_model().objects.create_user(email_lowercase, password, is_staff=True)
+        email_lowercase = "normal@normal.com"
+        password = "password1234$%&/"
+        user = get_user_model().objects.create_user(
+            email_lowercase, password, is_staff=True
+        )
         self.assertTrue(user.is_staff)
 
     def test_create_user_email_domain_normalize_rfc3696(self):
         # According to http://tools.ietf.org/html/rfc3696#section-3
         # the "@" symbol can be part of the local part of an email address
-        returned = get_user_model().objects.normalize_email(r'Abc\@DEF@EXAMPLE.com')
-        self.assertEqual(returned, r'Abc\@DEF@example.com')
+        returned = get_user_model().objects.normalize_email(r"Abc\@DEF@EXAMPLE.com")
+        self.assertEqual(returned, r"Abc\@DEF@example.com")
 
     def test_create_user_email_domain_normalize(self):
-        returned = get_user_model().objects.normalize_email('normal@DOMAIN.COM')
-        self.assertEqual(returned, 'normal@domain.com')
+        returned = get_user_model().objects.normalize_email("normal@DOMAIN.COM")
+        self.assertEqual(returned, "normal@domain.com")
 
     def test_create_user_email_domain_normalize_with_whitespace(self):
-        returned = get_user_model().objects.normalize_email('email\ with_whitespace@D.COM')
-        self.assertEqual(returned, 'email\ with_whitespace@d.com')
+        returned = get_user_model().objects.normalize_email(
+            "email\ with_whitespace@D.COM"
+        )
+        self.assertEqual(returned, "email\ with_whitespace@d.com")
 
     def test_empty_username(self):
         self.assertRaisesMessage(
             ValueError,
-            'The given email must be set',
-            get_user_model().objects.create_user, email=''
+            "The given email must be set",
+            get_user_model().objects.create_user,
+            email="",
         )
 
 
 class MigrationsTest(TestCase):
-
     def test_makemigrations_no_changes(self):
-        with patch('sys.stdout', new_callable=StringIO) as mock:
-            management.call_command('makemigrations', 'custom_user', dry_run=True)
-        self.assertEqual(mock.getvalue(), 'No changes detected in app \'custom_user\'\n')
+        with patch("sys.stdout", new_callable=StringIO) as mock:
+            management.call_command("makemigrations", "custom_user", dry_run=True)
+        self.assertEqual(mock.getvalue(), "No changes detected in app 'custom_user'\n")
 
 
 class TestAuthenticationMiddleware(TestCase):
-
     def setUp(self):
-        self.user_email = 'test@example.com'
-        self.user_password = 'test_password'
+        self.user_email = "test@example.com"
+        self.user_password = "test_password"
         self.user = get_user_model().objects.create_user(
-            self.user_email,
-            self.user_password)
+            self.user_email, self.user_password
+        )
 
         self.middleware_auth = AuthenticationMiddleware(lambda req: HttpResponse())
-        self.assertTrue(self.client.login(
-            username=self.user_email,
-            password=self.user_password,
-        ))
+        self.assertTrue(
+            self.client.login(
+                username=self.user_email,
+                password=self.user_password,
+            )
+        )
         self.request = HttpRequest()
         self.request.session = self.client.session
 
@@ -193,7 +203,7 @@ class TestAuthenticationMiddleware(TestCase):
         self.assertFalse(self.request.user.is_anonymous)
 
         # After password change, user should remain logged in.
-        self.user.set_password('new_password')
+        self.user.set_password("new_password")
         self.user.save()
         self.middleware_auth(self.request)
         self.assertIsNotNone(self.request.user)
@@ -203,7 +213,7 @@ class TestAuthenticationMiddleware(TestCase):
     def test_changed_password_invalidates_session_with_middleware(self):
         session_key = self.request.session.session_key
         # After password change, user should be anonymous
-        self.user.set_password('new_password')
+        self.user.set_password("new_password")
         self.user.save()
         self.middleware_auth(self.request)
         self.assertIsNotNone(self.request.user)
@@ -212,110 +222,121 @@ class TestAuthenticationMiddleware(TestCase):
         self.assertNotEqual(session_key, self.request.session.session_key)
 
 
-@override_settings(USE_TZ=False, PASSWORD_HASHERS=('django.contrib.auth.hashers.SHA1PasswordHasher',))
+@override_settings(
+    USE_TZ=False, PASSWORD_HASHERS=("django.contrib.auth.hashers.SHA1PasswordHasher",)
+)
 class EmailUserCreationFormTest(TestCase):
-
     def setUp(self):
-        get_user_model().objects.create_user('testclient@example.com', 'test123')
+        get_user_model().objects.create_user("testclient@example.com", "test123")
 
     def test_user_already_exists(self):
         data = {
-            'email': 'testclient@example.com',
-            'password1': 'test123',
-            'password2': 'test123',
+            "email": "testclient@example.com",
+            "password1": "test123",
+            "password2": "test123",
         }
         form = EmailUserCreationForm(data)
         self.assertFalse(form.is_valid())
-        self.assertEqual(form["email"].errors,
-                         [force_str(form.error_messages['duplicate_email'])])
+        self.assertEqual(
+            form["email"].errors, [force_str(form.error_messages["duplicate_email"])]
+        )
 
     def test_invalid_data(self):
         data = {
-            'email': 'testclient',
-            'password1': 'test123',
-            'password2': 'test123',
+            "email": "testclient",
+            "password1": "test123",
+            "password2": "test123",
         }
         form = EmailUserCreationForm(data)
         self.assertFalse(form.is_valid())
-        self.assertEqual(form["email"].errors,
-                         [_('Enter a valid email address.')])
+        self.assertEqual(form["email"].errors, [_("Enter a valid email address.")])
 
     def test_password_verification(self):
         # The verification password is incorrect.
         data = {
-            'email': 'testclient@example.com',
-            'password1': 'test123',
-            'password2': 'test',
+            "email": "testclient@example.com",
+            "password1": "test123",
+            "password2": "test",
         }
         form = EmailUserCreationForm(data)
         self.assertFalse(form.is_valid())
-        self.assertEqual(form["password2"].errors,
-                         [force_str(form.error_messages['password_mismatch'])])
+        self.assertEqual(
+            form["password2"].errors,
+            [force_str(form.error_messages["password_mismatch"])],
+        )
 
     def test_both_passwords(self):
         # One (or both) passwords weren't given
-        data = {'email': 'testclient@example.com'}
+        data = {"email": "testclient@example.com"}
         form = EmailUserCreationForm(data)
-        required_error = [force_str(Field.default_error_messages['required'])]
+        required_error = [force_str(Field.default_error_messages["required"])]
         self.assertFalse(form.is_valid())
-        self.assertEqual(form['password1'].errors, required_error)
-        self.assertEqual(form['password2'].errors, required_error)
+        self.assertEqual(form["password1"].errors, required_error)
+        self.assertEqual(form["password2"].errors, required_error)
 
-        data['password2'] = 'test123'
+        data["password2"] = "test123"
         form = EmailUserCreationForm(data)
         self.assertFalse(form.is_valid())
-        self.assertEqual(form['password1'].errors, required_error)
-        self.assertEqual(form['password2'].errors, [])
+        self.assertEqual(form["password1"].errors, required_error)
+        self.assertEqual(form["password2"].errors, [])
 
     def test_success(self):
         # The success case.
         data = {
-            'email': 'jsmith@example.com',
-            'password1': 'test123',
-            'password2': 'test123',
+            "email": "jsmith@example.com",
+            "password1": "test123",
+            "password2": "test123",
         }
         form = EmailUserCreationForm(data)
         self.assertTrue(form.is_valid())
         u = form.save()
-        self.assertEqual(repr(u), '<%s: jsmith@example.com>' % get_user_model().__name__)
+        self.assertEqual(
+            repr(u), "<%s: jsmith@example.com>" % get_user_model().__name__
+        )
         self.assertIsNotNone(u.pk)
 
     def test_success_without_commit(self):
         # The success case, but without saving the user instance to the db.
         data = {
-            'email': 'jsmith@example.com',
-            'password1': 'test123',
-            'password2': 'test123',
+            "email": "jsmith@example.com",
+            "password1": "test123",
+            "password2": "test123",
         }
         form = EmailUserCreationForm(data)
         self.assertTrue(form.is_valid())
         u = form.save(commit=False)
-        self.assertEqual(repr(u), '<%s: jsmith@example.com>' % get_user_model().__name__)
+        self.assertEqual(
+            repr(u), "<%s: jsmith@example.com>" % get_user_model().__name__
+        )
         self.assertIsNone(u.pk, None)
 
 
-@override_settings(USE_TZ=False, PASSWORD_HASHERS=('django.contrib.auth.hashers.SHA1PasswordHasher',))
+@override_settings(
+    USE_TZ=False, PASSWORD_HASHERS=("django.contrib.auth.hashers.SHA1PasswordHasher",)
+)
 class EmailUserChangeFormTest(TestCase):
-
     def setUp(self):
-        user = get_user_model().objects.create_user('testclient@example.com')
-        user.password = 'sha1$6efc0$f93efe9fd7542f25a7be94871ea45aa95de57161'
+        user = get_user_model().objects.create_user("testclient@example.com")
+        user.password = "sha1$6efc0$f93efe9fd7542f25a7be94871ea45aa95de57161"
         user.save()
-        get_user_model().objects.create_user('empty_password@example.com')
-        user_unmanageable = get_user_model().objects.create_user('unmanageable_password@example.com')
-        user_unmanageable.password = '$'
+        get_user_model().objects.create_user("empty_password@example.com")
+        user_unmanageable = get_user_model().objects.create_user(
+            "unmanageable_password@example.com"
+        )
+        user_unmanageable.password = "$"
         user_unmanageable.save()
-        user_unknown = get_user_model().objects.create_user('unknown_password@example.com')
-        user_unknown.password = 'foo$bar'
+        user_unknown = get_user_model().objects.create_user(
+            "unknown_password@example.com"
+        )
+        user_unknown.password = "foo$bar"
         user_unknown.save()
 
     def test_username_validity(self):
-        user = get_user_model().objects.get(email='testclient@example.com')
-        data = {'email': 'not valid'}
+        user = get_user_model().objects.get(email="testclient@example.com")
+        data = {"email": "not valid"}
         form = EmailUserChangeForm(data, instance=user)
         self.assertFalse(form.is_valid())
-        self.assertEqual(form['email'].errors,
-                         [_('Enter a valid email address.')])
+        self.assertEqual(form["email"].errors, [_("Enter a valid email address.")])
 
     def test_bug_14242(self):
         # A regression test, introduce by adding an optimization for the
@@ -324,44 +345,46 @@ class EmailUserChangeFormTest(TestCase):
         class MyUserForm(EmailUserChangeForm):
             def __init__(self, *args, **kwargs):
                 super(MyUserForm, self).__init__(*args, **kwargs)
-                self.fields['groups'].help_text = 'These groups give users different permissions'
+                self.fields[
+                    "groups"
+                ].help_text = "These groups give users different permissions"
 
             class Meta(EmailUserChangeForm.Meta):
-                fields = ('groups',)
+                fields = ("groups",)
 
         # Just check we can create it
         MyUserForm({})
 
     def test_unsuable_password(self):
-        user = get_user_model().objects.get(email='empty_password@example.com')
+        user = get_user_model().objects.get(email="empty_password@example.com")
         user.set_unusable_password()
         user.save()
         form = EmailUserChangeForm(instance=user)
         self.assertIn(_("No password set."), form.as_table())
 
     def test_bug_17944_empty_password(self):
-        user = get_user_model().objects.get(email='empty_password@example.com')
+        user = get_user_model().objects.get(email="empty_password@example.com")
         form = EmailUserChangeForm(instance=user)
         self.assertIn(_("No password set."), form.as_table())
 
     def test_bug_17944_unmanageable_password(self):
-        user = get_user_model().objects.get(email='unmanageable_password@example.com')
+        user = get_user_model().objects.get(email="unmanageable_password@example.com")
         form = EmailUserChangeForm(instance=user)
         self.assertIn(
-            _("Invalid password format or unknown hashing algorithm."),
-            form.as_table())
+            _("Invalid password format or unknown hashing algorithm."), form.as_table()
+        )
 
     def test_bug_17944_unknown_password_algorithm(self):
-        user = get_user_model().objects.get(email='unknown_password@example.com')
+        user = get_user_model().objects.get(email="unknown_password@example.com")
         form = EmailUserChangeForm(instance=user)
         self.assertIn(
-            _("Invalid password format or unknown hashing algorithm."),
-            form.as_table())
+            _("Invalid password format or unknown hashing algorithm."), form.as_table()
+        )
 
     def test_bug_19133(self):
         """The change form does not return the password value."""
         # Use the form to construct the POST data
-        user = get_user_model().objects.get(email='testclient@example.com')
+        user = get_user_model().objects.get(email="testclient@example.com")
         form_for_data = EmailUserChangeForm(instance=user)
         post_data = form_for_data.initial
 
@@ -369,29 +392,31 @@ class EmailUserChangeFormTest(TestCase):
         # posted here should be ignored; the form will be
         # valid, and give back the 'initial' value for the
         # password field.
-        post_data['password'] = 'new password'
+        post_data["password"] = "new password"
         form = EmailUserChangeForm(instance=user, data=post_data)
 
         self.assertTrue(form.is_valid())
-        self.assertEqual(form.cleaned_data['password'], 'sha1$6efc0$f93efe9fd7542f25a7be94871ea45aa95de57161')
+        self.assertEqual(
+            form.cleaned_data["password"],
+            "sha1$6efc0$f93efe9fd7542f25a7be94871ea45aa95de57161",
+        )
 
     def test_bug_19349_bound_password_field(self):
-        user = get_user_model().objects.get(email='testclient@example.com')
+        user = get_user_model().objects.get(email="testclient@example.com")
         form = EmailUserChangeForm(data={}, instance=user)
         # When rendering the bound password field,
         # ReadOnlyPasswordHashWidget needs the initial
         # value to render correctly
-        self.assertEqual(form.initial['password'], form['password'].value())
+        self.assertEqual(form.initial["password"], form["password"].value())
 
 
 class EmailUserAdminTest(TestCase):
-
     def setUp(self):
-        self.user_email = 'test@example.com'
-        self.user_password = 'test_password'
+        self.user_email = "test@example.com"
+        self.user_password = "test_password"
         self.user = get_user_model().objects.create_superuser(
-            self.user_email,
-            self.user_password)
+            self.user_email, self.user_password
+        )
 
         if settings.AUTH_USER_MODEL == "custom_user.EmailUser":
             self.app_name = "custom_user"
@@ -407,58 +432,81 @@ class EmailUserAdminTest(TestCase):
             self.app_verbose_name = "Test Custom User Subclass"
 
     def test_url(self):
-        self.assertTrue(self.client.login(
-            username=self.user_email,
-            password=self.user_password,
-        ))
+        self.assertTrue(
+            self.client.login(
+                username=self.user_email,
+                password=self.user_password,
+            )
+        )
         response = self.client.get(reverse("admin:app_list", args=(self.app_name,)))
         self.assertEqual(response.status_code, 200)
 
     def test_app_name(self):
-        self.assertTrue(self.client.login(
-            username=self.user_email,
-            password=self.user_password,
-        ))
+        self.assertTrue(
+            self.client.login(
+                username=self.user_email,
+                password=self.user_password,
+            )
+        )
 
         response = self.client.get(reverse("admin:app_list", args=(self.app_name,)))
-        self.assertEqual(response.context['app_list'][0]['name'], self.app_verbose_name)
+        self.assertEqual(response.context["app_list"][0]["name"], self.app_verbose_name)
 
     def test_model_name(self):
-        self.assertTrue(self.client.login(
-            username=self.user_email,
-            password=self.user_password,
-        ))
+        self.assertTrue(
+            self.client.login(
+                username=self.user_email,
+                password=self.user_password,
+            )
+        )
 
-        response = self.client.get(reverse("admin:%s_%s_changelist" % (self.app_name, self.model_name)))
-        self.assertEqual(force_str(response.context['title']), "Select %s to change" % self.model_verbose_name)
+        response = self.client.get(
+            reverse("admin:%s_%s_changelist" % (self.app_name, self.model_name))
+        )
+        self.assertEqual(
+            force_str(response.context["title"]),
+            "Select %s to change" % self.model_verbose_name,
+        )
 
     def test_model_name_plural(self):
-        self.assertTrue(self.client.login(
-            username=self.user_email,
-            password=self.user_password,
-        ))
+        self.assertTrue(
+            self.client.login(
+                username=self.user_email,
+                password=self.user_password,
+            )
+        )
 
         response = self.client.get(reverse("admin:app_list", args=(self.app_name,)))
-        self.assertEqual(force_str(response.context['app_list'][0]['models'][0]['name']), self.model_verbose_name_plural)
+        self.assertEqual(
+            force_str(response.context["app_list"][0]["models"][0]["name"]),
+            self.model_verbose_name_plural,
+        )
 
     def test_user_change_password(self):
-        self.assertTrue(self.client.login(
-            username=self.user_email,
-            password=self.user_password,
-        ))
+        self.assertTrue(
+            self.client.login(
+                username=self.user_email,
+                password=self.user_password,
+            )
+        )
 
-        user_change_url = reverse('admin:%s_%s_change' % (self.app_name, self.model_name), args=(self.user.pk,))
-        password_change_url = reverse('admin:auth_user_password_change', args=(self.user.pk,))
+        user_change_url = reverse(
+            "admin:%s_%s_change" % (self.app_name, self.model_name),
+            args=(self.user.pk,),
+        )
+        password_change_url = reverse(
+            "admin:auth_user_password_change", args=(self.user.pk,)
+        )
 
         response = self.client.get(user_change_url)
         # Test the link inside password field help_text.
         rel_link = re.search(
             r'you can change the password using <a href="([^"]*)">this form</a>',
-            force_str(response.content)
+            force_str(response.content),
         ).groups()[0]
         self.assertEqual(
             os.path.normpath(user_change_url + rel_link),
-            os.path.normpath(password_change_url)
+            os.path.normpath(password_change_url),
         )
 
         # Test url is correct.
