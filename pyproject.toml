@@ -86,7 +86,7 @@ source = [
 [tool.coverage.report]
 fail_under = 99
 show_missing = true
-# skip_covered = true
+skip_covered = true
 
 [tool.isort]
 profile = "black"
