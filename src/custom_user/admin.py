@@ -7,9 +7,11 @@ from .forms import EmailUserChangeForm, EmailUserCreationForm
 from .models import EmailUser
 
 
+@admin.register(EmailUser)
 class EmailUserAdmin(UserAdmin):
-
-    """EmailUser Admin model."""
+    """
+    EmailUser Admin model.
+    """
 
     fieldsets = (
         (None, {"fields": ("email", "password")}),
@@ -22,13 +24,19 @@ class EmailUserAdmin(UserAdmin):
                     "is_superuser",
                     "groups",
                     "user_permissions",
-                )
+                ),
             },
         ),
         (_("Important dates"), {"fields": ("last_login", "date_joined")}),
     )
     add_fieldsets = (
-        (None, {"classes": ("wide",), "fields": ("email", "password1", "password2")}),
+        (
+            None,
+            {
+                "classes": ("wide",),
+                "fields": ("email", "password1", "password2"),
+            },
+        ),
     )
 
     # The forms to add and change user instances
@@ -46,7 +54,3 @@ class EmailUserAdmin(UserAdmin):
         "groups",
         "user_permissions",
     )
-
-
-# Register the new EmailUserAdmin
-admin.site.register(EmailUser, EmailUserAdmin)
