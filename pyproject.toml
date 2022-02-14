@@ -10,7 +10,7 @@ repository = "https://github.com/jcugat/django-custom-user"
 documentation = "https://github.com/jcugat/django-custom-user#django-custom-user"
 keywords = ["django", "custom", "user", "auth", "model", "email", "without", "username"]
 classifiers = [
-    "Development Status :: 4 - Beta",
+    "Development Status :: 5 - Production/Stable",
     "Environment :: Web Environment",
     "Framework :: Django",
     "Intended Audience :: Developers",

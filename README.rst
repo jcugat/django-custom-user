@@ -134,6 +134,35 @@ Python:
 Changelog
 ---------
 
+Version 1.0 (In development)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+After a long hiatus, this new version brings compatibility with the latest Django and Python versions, among lots of small improvements and cleanups.
+
+- Supported versions:
+
+  - Django: 3.2 LTS, 4.0
+
+  - Python: 3.7, 3.8, 3.9, 3.10
+
+- Import latest code changes from Django 4.0 (`#65 <https://github.com/jcugat/django-custom-user/pull/65>`_):
+
+  - ``EmailUserCreationForm`` does not strip whitespaces in the password fields, to match Django's behavior.
+
+  - ``EmailUserCreationForm`` supports custom password validators configured by ``AUTH_PASSWORD_VALIDATORS``.
+
+  - ``EmailUser.objects.create_superuser()`` allows empty passwords. It will also check that both ``is_staff`` and ``is_superuser`` parameters are ``True`` (if passed). Otherwise, it would create an invalid superuser.
+
+- Internal changes:
+
+  - Moved away from Travis CI to Github Actions.
+
+  - Build system and dependencies managed with `Poetry <https://python-poetry.org/>`_.
+
+  - Code formatted with `black <https://github.com/psf/black>`_ and `isort <https://pycqa.github.io/isort/>`_.
+
+Note that older versions of Django are not supported, but you can use the previous version 0.7 if you need it.
+
 Version 0.7 (2017-01-12)
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
