@@ -18,7 +18,7 @@ publish:
 	@read -p "Press Enter to continue...";
 	@echo ""
 	@echo "Afterwards, run the following commands:"
-	@echo "bumpversion --allow-dirty minor"
+	@echo "poetry run bumpversion --allow-dirty minor"
 	@echo "poetry build"
 	@echo "poetry publish"
 	@echo ""
