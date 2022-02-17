@@ -79,8 +79,8 @@ jobs:
       run: |
         import sys
         python_version = "py{}{}".format(*sys.version_info[:2])
-        django_version = {{ '"${{ matrix.django-version }}"' }}
-        database_version = {{ '"${{ matrix.database-version }}"' }}
+        django_version = "${{ matrix.django-version }}"
+        database_version = "${{ matrix.database-version }}"
         result = "{}-{}-{}".format(python_version, django_version, database_version)
         print("::set-output name=result::{}".format(result))
 
