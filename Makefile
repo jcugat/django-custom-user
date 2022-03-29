@@ -18,12 +18,15 @@ publish:
 	@read -p "Press Enter to continue...";
 	@echo ""
 	@echo "Afterwards, run the following commands:"
-	@echo "poetry run bumpversion --allow-dirty minor"
+	@echo "poetry run bumpversion --allow-dirty major/minor"
 	@echo "poetry build"
 	@echo "poetry publish"
 	@echo ""
 	@read -p "Press Enter to continue...";
 	@echo ""
+	@echo "Remove branch protection for Administrators."
 	@echo "You probably want to update the repo now:"
-	@echo "git push origin master"
+	@echo "git push origin main"
 	@echo "git push --tags"
+	@echo ""
+	@echo "Remember to enable back the branch protection."
