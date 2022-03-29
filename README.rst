@@ -134,8 +134,8 @@ Python:
 Changelog
 ---------
 
-Version 1.0 (In development)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Version 1.0 (2022-03-29)
+~~~~~~~~~~~~~~~~~~~~~~~~
 
 After a long hiatus, this new version brings compatibility with the latest Django and Python versions, among lots of small improvements and cleanups.
 

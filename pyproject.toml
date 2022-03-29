@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "django-custom-user"
-version = "0.7"
+version = "1.0"
 description = "Custom user model for Django with the same behaviour as the default User class but with email instead of username."
 authors = ["Josep Cugat <jcugat@gmail.com>"]
 license = "BSD-3-Clause"
