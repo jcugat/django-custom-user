@@ -898,8 +898,8 @@ postgres = ["psycopg2"]
 
 [metadata]
 lock-version = "1.1"
-python-versions = "^3.8.1"
-content-hash = "31cb6482c44c14fe00923d365e1f5c056d8e3b4cb01dba9d26387cda441222ee"
+python-versions = ">=3.8.1,<4.0"
+content-hash = "eb2d8d5db0e7c66da41246b0c3a4a060cd85bd30a4b64cf1940a8d0e6356aa1a"
 
 [metadata.files]
 asgiref = [
