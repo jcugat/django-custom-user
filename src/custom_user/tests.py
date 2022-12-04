@@ -4,6 +4,7 @@ import re
 from io import StringIO
 from unittest import mock
 
+import django
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.middleware import AuthenticationMiddleware
@@ -525,7 +526,10 @@ class EmailUserAdminTest(TestCase):
             self.model_name = "mycustomemailuser"
             self.model_verbose_name = "MyCustomEmailUserVerboseName"
             self.model_verbose_name_plural = "MyCustomEmailUserVerboseNamePlural"
-            self.app_verbose_name = "Test Custom User Subclass"
+            if django.VERSION[:2] < (4, 1):
+                self.app_verbose_name = "Test Custom User Subclass"  # pragma: no cover
+            else:
+                self.app_verbose_name = "Test_Custom_User_Subclass"  # pragma: no cover
 
     def test_url(self):
         self.assertTrue(
