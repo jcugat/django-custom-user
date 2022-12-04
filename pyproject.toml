@@ -52,7 +52,7 @@ flake8 = "^4.0.1"
 isort = "^5.10.0"
 tox = "^3.24.0"
 tox-gh-actions = "^2.9.0"
-tox-poetry-installer = {extras = ["poetry"], version = "^0.8.3"}
+tox-poetry-installer = {extras = ["poetry"], version = "^0.8.5"}
 
 [tool.poetry.extras]
 mysql = ["mysqlclient"]
