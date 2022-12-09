@@ -59,7 +59,10 @@ mysql = ["mysqlclient"]
 postgres = ["psycopg2"]
 
 [build-system]
-requires = ["poetry-core>=1.0.0,poetry-core<1.1"]
+# This is needed because newer versions of poetry-core are not compatible with
+# tox-poetry-installer, and if we upgrade tox-poetry-installer then we are forced
+# to bump the lowest required version of Python, which we still want to test against
+requires = ["poetry-core<1.1"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.black]
