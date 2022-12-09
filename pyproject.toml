@@ -53,16 +53,17 @@ isort = "^5.10.0"
 tox = "^3.24.0"
 tox-gh-actions = "^2.9.0"
 tox-poetry-installer = {extras = ["poetry"], version = "^0.8.3"}
+# This is needed because newer versions of poetry-core are not compatible with
+# tox-poetry-installer, and if we upgrade tox-poetry-installer then we are forced
+# to bump the lowest required version of Python, which we still want to test against
+poetry-core = "<1.1"
 
 [tool.poetry.extras]
 mysql = ["mysqlclient"]
 postgres = ["psycopg2"]
 
 [build-system]
-# This is needed because newer versions of poetry-core are not compatible with
-# tox-poetry-installer, and if we upgrade tox-poetry-installer then we are forced
-# to bump the lowest required version of Python, which we still want to test against
-requires = ["poetry-core<1.1"]
+requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.black]
