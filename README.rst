@@ -134,6 +134,11 @@ Python:
 Changelog
 ---------
 
+Version 1.1 (2022-12-10)
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+Added support for Django 4.1 and Python 3.11.
+
 Version 1.0 (2022-03-29)
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
