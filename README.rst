@@ -120,15 +120,17 @@ Supported versions
 
 Django:
 
-- 3.2 LTS
+- 4.1
 - 4.0
+- 3.2 LTS
 
 Python:
 
-- 3.7
-- 3.8
-- 3.9
+- 3.11
 - 3.10
+- 3.9
+- 3.8
+- 3.7
 
 
 Changelog
